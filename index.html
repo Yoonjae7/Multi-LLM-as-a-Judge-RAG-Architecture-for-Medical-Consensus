@@ -22,17 +22,20 @@
     <a href="#" class="logo-link" aria-label="University of Nottingham">
       <img src="nottingham-brand-blue-horizontal.png" alt="University of Nottingham" class="logo">
     </a>
-    <div class="header-actions">
-      <div class="view-toggle glass" role="tablist" aria-label="Page view">
-        <span class="toggle-slider" aria-hidden="true"></span>
-        <button type="button" class="toggle-btn is-active" role="tab" aria-selected="true" data-view="home">Home</button>
-        <button type="button" class="toggle-btn" role="tab" aria-selected="false" data-view="demo">Demo</button>
-      </div>
-      <nav class="nav" aria-label="Primary">
-        <a href="#about">About</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#research">Research</a>
-      </nav>
+    <div class="view-toggle glass" role="tablist" aria-label="Page view">
+      <span class="toggle-slider" aria-hidden="true"></span>
+      <button type="button" class="toggle-btn is-active" role="tab" aria-selected="true" data-view="home">Home</button>
+      <button type="button" class="toggle-btn" role="tab" aria-selected="false" data-view="demo">Demo</button>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href="#about">About</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#research">Research</a>
+    </nav>
+    <div class="language-switch glass" aria-label="Language mode">
+      <button type="button" class="language-btn is-active" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" class="language-btn" data-lang="ko" aria-pressed="false">KR</button>
+      <button type="button" class="language-btn" data-lang="zh" aria-pressed="false">中文</button>
     </div>
   </header>
 
@@ -105,155 +108,170 @@
     <section id="architecture" class="section section-architecture">
       <div class="section-header">
         <h2>System Architecture</h2>
-        <p>From health question to integrated, safety-validated recommendation. Hover each node for details.</p>
+        <p>From health question to retrieved evidence, specialist debate, safety judging, and final consensus.</p>
       </div>
 
       <div class="arch-diagram" id="arch-diagram" aria-label="MediConsensus system architecture">
-        <!-- Layer 1 -->
-        <div class="arch-layer layer-animate" data-layer="1">
-          <div class="arch-node node-blue" tabindex="0"
-               data-tooltip="The entry point of the system. Users submit health questions or case context that trigger the full retrieval, debate, and validation pipeline.">
-            <span class="node-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            </span>
-            <div class="node-text">
-              <strong>User</strong>
-              <span>Asks a health question</span>
+        <section class="arch-stage arch-stage-input" aria-label="Input stage">
+          <div class="arch-stage-header">
+            <span class="metric-kicker">Input</span>
+            <h3>Question Intake</h3>
+            <p>User context is interpreted and routed into the correct medical knowledge paths.</p>
+          </div>
+
+          <div class="arch-layer layer-animate" data-layer="1">
+            <div class="arch-node node-blue" tabindex="0"
+                 data-tooltip="The entry point of the system. Users submit health questions or case context that trigger the full retrieval, debate, and validation pipeline.">
+              <span class="node-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </span>
+              <div class="node-text">
+                <strong>User</strong>
+                <span>Asks a health question</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+          <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
 
-        <!-- Layer 2 -->
-        <div class="arch-layer layer-animate" data-layer="2">
-          <div class="arch-node node-green" tabindex="0"
-               data-tooltip="Analyses the user's question to determine intent, required knowledge domains, and which retrieval systems and agents should be activated.">
-            <span class="node-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
-            </span>
-            <div class="node-text">
-              <strong>Query Planner</strong>
-              <span>Analyzes the question and plans retrieval and agents</span>
+          <div class="arch-layer layer-animate" data-layer="2">
+            <div class="arch-node node-green" tabindex="0"
+                 data-tooltip="Analyses the user's question to determine intent, required knowledge domains, and which retrieval systems and agents should be activated.">
+              <span class="node-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+              </span>
+              <div class="node-text">
+                <strong>Query Planner</strong>
+                <span>Analyzes the question and plans retrieval and agents</span>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+        <div class="arch-stage-bridge" aria-hidden="true">↓</div>
 
-        <!-- Layer 3 -->
-        <div class="arch-layer arch-layer-dual layer-animate" data-layer="3">
-          <div class="arch-node node-blue arch-node-wide" tabindex="0"
-               data-tooltip="Evidence-grounded RAG for modern medicine. Retrieves from authoritative Western medical sources to support evidence-based recommendations with citations.">
-            <div class="node-text">
-              <strong>MediRAG-West</strong>
-              <span>Modern medicine retrieval</span>
-            </div>
-            <ul class="node-sources">
-              <li>Clinical Guidelines (NICE, WHO)</li>
-              <li>Biomedical Literature (PubMed)</li>
-              <li>Drug Databases</li>
-              <li>Systematic Reviews</li>
-            </ul>
+        <section class="arch-stage arch-stage-retrieval" aria-label="Retrieval stage">
+          <div class="arch-stage-header">
+            <span class="metric-kicker">Retrieval</span>
+            <h3>Dual Evidence Grounding</h3>
+            <p>Western medicine and TCM evidence sources are retrieved separately before being reconciled.</p>
           </div>
-          <div class="arch-node node-green arch-node-wide" tabindex="0"
-               data-tooltip="Specialised RAG for Traditional Chinese Medicine. Retrieves TCM knowledge including syndrome differentiation, herbal medicine, and acupuncture theory.">
-            <div class="node-text">
-              <strong>TCM-RAG</strong>
-              <span>Traditional Chinese Medicine retrieval</span>
-            </div>
-            <ul class="node-sources">
-              <li>TCM Textbooks &amp; Classics</li>
-              <li>Herbal Medicine Databases</li>
-              <li>Acupuncture &amp; Meridian Knowledge</li>
-              <li>TCM Clinical Guidelines &amp; Studies</li>
-            </ul>
-          </div>
-        </div>
 
-        <div class="arch-merge" aria-hidden="true">
-          <div class="merge-branch merge-left"></div>
-          <div class="arch-arrow arch-arrow-merge"><span>↓</span></div>
-          <div class="merge-branch merge-right"></div>
-        </div>
-
-        <!-- Layer 4 -->
-        <div class="arch-layer arch-layer-container layer-debate layer-animate" data-layer="4">
-          <p class="container-label">Multi-Agent Debate</p>
-          <p class="container-desc">Domain-specific agents independently generate recommendations and rationales</p>
-          <div class="arch-row">
-            <div class="arch-node node-blue arch-node-sm" tabindex="0"
-                 data-tooltip="Provides evidence-based recommendations from a modern Western medicine perspective, grounded in retrieved clinical guidelines and literature.">
-              <strong>Western Medicine Agent</strong>
-              <span>Evidence-based modern medicine</span>
+          <div class="arch-layer arch-layer-dual layer-animate" data-layer="3">
+            <div class="arch-node node-blue arch-node-wide" tabindex="0"
+                 data-tooltip="Evidence-grounded RAG for modern medicine. Retrieves from authoritative Western medical sources to support evidence-based recommendations with citations.">
+              <div class="node-text">
+                <strong>MediRAG-West</strong>
+                <span>Modern medicine retrieval</span>
+              </div>
+              <ul class="node-sources">
+                <li>Clinical Guidelines (NICE, WHO)</li>
+                <li>Biomedical Literature (PubMed)</li>
+                <li>Drug Databases</li>
+                <li>Systematic Reviews</li>
+              </ul>
             </div>
-            <div class="arch-node node-green arch-node-sm" tabindex="0"
-                 data-tooltip="Generates recommendations based on TCM theory, syndrome differentiation, herbal knowledge, and constitution analysis.">
-              <strong>TCM Agent</strong>
-              <span>TCM theory, syndrome differentiation, herbal knowledge</span>
-            </div>
-            <div class="arch-node node-orange arch-node-sm" tabindex="0"
-                 data-tooltip="Provides nutrition-related recommendations and dietary guidance aligned with the user's health context.">
-              <strong>Nutrition Agent</strong>
-              <span>Dietary guidance</span>
-            </div>
-            <div class="arch-node node-purple arch-node-sm" tabindex="0"
-                 data-tooltip="Offers lifestyle, behavioural, and wellness guidance to complement medical and nutritional advice.">
-              <strong>Lifestyle Agent</strong>
-              <span>Behavioral and wellness guidance</span>
+            <div class="arch-node node-green arch-node-wide" tabindex="0"
+                 data-tooltip="Specialised RAG for Traditional Chinese Medicine. Retrieves TCM knowledge including syndrome differentiation, herbal medicine, and acupuncture theory.">
+              <div class="node-text">
+                <strong>TCM-RAG</strong>
+                <span>Traditional Chinese Medicine retrieval</span>
+              </div>
+              <ul class="node-sources">
+                <li>TCM Textbooks &amp; Classics</li>
+                <li>Herbal Medicine Databases</li>
+                <li>Acupuncture &amp; Meridian Knowledge</li>
+                <li>TCM Clinical Guidelines &amp; Studies</li>
+              </ul>
             </div>
           </div>
-        </div>
 
-        <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+        </section>
 
-        <!-- Layer 5 -->
-        <div class="arch-layer arch-layer-container layer-judge layer-animate" data-layer="5">
-          <p class="container-label">SafeJudge</p>
-          <p class="container-desc">LLM-as-a-Judge evaluates, verifies, and scores all agent outputs</p>
-          <div class="arch-row">
-            <div class="arch-node node-blue arch-node-sm" tabindex="0"
-                 data-tooltip="Checks whether agent recommendations are supported by retrieved evidence and assesses citation quality and factual grounding.">
-              <strong>Evidence Judge</strong>
-              <span>Checks citation quality</span>
-            </div>
-            <div class="arch-node node-green arch-node-sm" tabindex="0"
-                 data-tooltip="Detects potential risks, contraindications, drug interactions, and unsafe advice before responses reach the user.">
-              <strong>Safety Judge</strong>
-              <span>Detects risks and contraindications</span>
-            </div>
-            <div class="arch-node node-orange arch-node-sm" tabindex="0"
-                 data-tooltip="Identifies conflicts between agents and medical paradigms, surfacing areas of disagreement for transparent resolution.">
-              <strong>Conflict Judge</strong>
-              <span>Identifies conflicts between paradigms</span>
-            </div>
-            <div class="arch-node node-purple arch-node-sm" tabindex="0"
-                 data-tooltip="Estimates overall confidence and uncertainty levels, helping users understand how reliable each recommendation is.">
-              <strong>Confidence Judge</strong>
-              <span>Estimates uncertainty levels</span>
+        <div class="arch-stage-bridge" aria-hidden="true">↓</div>
+
+        <section class="arch-stage arch-stage-governance" aria-label="Governance stage">
+          <div class="arch-stage-header">
+            <span class="metric-kicker">Governance</span>
+            <h3>Debate, Judge, Consensus</h3>
+            <p>Specialist agents propose answers, then SafeJudge checks evidence, risk, conflict, and confidence.</p>
+          </div>
+
+          <div class="arch-layer arch-layer-container layer-debate layer-animate" data-layer="4">
+            <p class="container-label">Multi-Agent Debate</p>
+            <p class="container-desc">Domain-specific agents independently generate recommendations and rationales</p>
+            <div class="arch-row">
+              <div class="arch-node node-blue arch-node-sm" tabindex="0"
+                   data-tooltip="Provides evidence-based recommendations from a modern Western medicine perspective, grounded in retrieved clinical guidelines and literature.">
+                <strong>Western Medicine Agent</strong>
+                <span>Evidence-based modern medicine</span>
+              </div>
+              <div class="arch-node node-green arch-node-sm" tabindex="0"
+                   data-tooltip="Generates recommendations based on TCM theory, syndrome differentiation, herbal knowledge, and constitution analysis.">
+                <strong>TCM Agent</strong>
+                <span>TCM theory, syndrome differentiation, herbal knowledge</span>
+              </div>
+              <div class="arch-node node-orange arch-node-sm" tabindex="0"
+                   data-tooltip="Provides nutrition-related recommendations and dietary guidance aligned with the user's health context.">
+                <strong>Nutrition Agent</strong>
+                <span>Dietary guidance</span>
+              </div>
+              <div class="arch-node node-purple arch-node-sm" tabindex="0"
+                   data-tooltip="Offers lifestyle, behavioural, and wellness guidance to complement medical and nutritional advice.">
+                <strong>Lifestyle Agent</strong>
+                <span>Behavioral and wellness guidance</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+          <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
 
-        <!-- Layer 6 -->
-        <div class="arch-layer layer-animate" data-layer="6">
-          <div class="arch-node node-blue arch-node-wide arch-node-output" tabindex="0"
-               data-tooltip="The final synthesised output combining all agent recommendations and judge evaluations into a transparent, evidence-aware, safety-validated response.">
-            <div class="node-text">
-              <strong>Integrated Response</strong>
-              <span>Synthesized, evidence-aware, and safety-validated recommendation</span>
+          <div class="arch-layer arch-layer-container layer-judge layer-animate" data-layer="5">
+            <p class="container-label">SafeJudge</p>
+            <p class="container-desc">LLM-as-a-Judge evaluates, verifies, and scores all agent outputs</p>
+            <div class="arch-row">
+              <div class="arch-node node-blue arch-node-sm" tabindex="0"
+                   data-tooltip="Checks whether agent recommendations are supported by retrieved evidence and assesses citation quality and factual grounding.">
+                <strong>Evidence Judge</strong>
+                <span>Checks citation quality</span>
+              </div>
+              <div class="arch-node node-green arch-node-sm" tabindex="0"
+                   data-tooltip="Detects potential risks, contraindications, drug interactions, and unsafe advice before responses reach the user.">
+                <strong>Safety Judge</strong>
+                <span>Detects risks and contraindications</span>
+              </div>
+              <div class="arch-node node-orange arch-node-sm" tabindex="0"
+                   data-tooltip="Identifies conflicts between agents and medical paradigms, surfacing areas of disagreement for transparent resolution.">
+                <strong>Conflict Judge</strong>
+                <span>Identifies conflicts between paradigms</span>
+              </div>
+              <div class="arch-node node-purple arch-node-sm" tabindex="0"
+                   data-tooltip="Estimates overall confidence and uncertainty levels, helping users understand how reliable each recommendation is.">
+                <strong>Confidence Judge</strong>
+                <span>Estimates uncertainty levels</span>
+              </div>
             </div>
-            <ul class="node-sources node-output-list">
-              <li>Summary of recommendations</li>
-              <li>Evidence &amp; citations</li>
-              <li>Agreements &amp; disagreements</li>
-              <li>Safety notes</li>
-              <li>Confidence score</li>
-            </ul>
           </div>
-        </div>
+
+          <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+
+          <div class="arch-layer layer-animate" data-layer="6">
+            <div class="arch-node node-blue arch-node-wide arch-node-output" tabindex="0"
+                 data-tooltip="The final synthesised output combining all agent recommendations and judge evaluations into a transparent, evidence-aware, safety-validated response.">
+              <div class="node-text">
+                <strong>Integrated Response</strong>
+                <span>Synthesized, evidence-aware, and safety-validated recommendation</span>
+              </div>
+              <ul class="node-sources node-output-list">
+                <li>Summary of recommendations</li>
+                <li>Evidence &amp; citations</li>
+                <li>Agreements &amp; disagreements</li>
+                <li>Safety notes</li>
+                <li>Confidence score</li>
+              </ul>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
 
@@ -279,19 +297,28 @@
       <h1 class="demo-title">Choose a consultation mode</h1>
       <p class="demo-lead">Select which medical knowledge base to query for your health question.</p>
 
-      <div class="demo-options">
-        <button type="button" class="demo-option demo-option-west glass" data-mode="west">
-          <span class="demo-option-label">West Medicine</span>
+      <div class="demo-options glass mode-west" role="radiogroup" aria-label="Consultation mode">
+        <span class="demo-slider" aria-hidden="true"></span>
+        <button type="button" class="demo-option demo-option-west is-selected" data-mode="west" data-index="0" role="radio" aria-checked="true">
+          <span class="demo-option-label">Western Medicine</span>
           <span class="demo-option-desc">Evidence-based modern medicine via MediRAG-West</span>
         </button>
-        <button type="button" class="demo-option demo-option-tcm glass" data-mode="tcm">
+        <button type="button" class="demo-option demo-option-tcm" data-mode="tcm" data-index="1" role="radio" aria-checked="false">
           <span class="demo-option-label">TCM</span>
           <span class="demo-option-desc">Traditional Chinese Medicine via TCM-RAG</span>
         </button>
-        <button type="button" class="demo-option demo-option-both glass" data-mode="both">
-          <span class="demo-option-label">West Medicine + TCM</span>
+        <button type="button" class="demo-option demo-option-both" data-mode="both" data-index="2" role="radio" aria-checked="false">
+          <span class="demo-option-label">Western Medicine + TCM</span>
           <span class="demo-option-desc">Integrative dual-paradigm consultation</span>
         </button>
+      </div>
+
+      <div class="prototype-status glass" role="status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <div>
+          <strong>Prototyping in progress</strong>
+          <span>Consultation workflow and medical retrieval outputs are under active development.</span>
+        </div>
       </div>
     </section>
   </main>
