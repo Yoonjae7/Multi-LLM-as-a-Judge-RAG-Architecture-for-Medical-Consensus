@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus</title>
+  <meta name="description" content="Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus — University of Nottingham research internship.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-gradient" aria-hidden="true"></div>
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+
+  <header class="site-header">
+    <a href="#" class="logo-link" aria-label="University of Nottingham">
+      <img src="nottingham-brand-blue-horizontal.png" alt="University of Nottingham" class="logo">
+    </a>
+    <div class="header-actions">
+      <div class="view-toggle glass" role="tablist" aria-label="Page view">
+        <span class="toggle-slider" aria-hidden="true"></span>
+        <button type="button" class="toggle-btn is-active" role="tab" aria-selected="true" data-view="home">Home</button>
+        <button type="button" class="toggle-btn" role="tab" aria-selected="false" data-view="demo">Demo</button>
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <a href="#about">About</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#research">Research</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="home-view" class="view-panel">
+    <section id="team" class="hero">
+      <p class="eyebrow">University of Nottingham · Research Internship</p>
+      <h1>Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus</h1>
+      <p class="lead">
+        A multi-agent healthcare AI framework combining Retrieval-Augmented Generation, Agentic AI,
+        and LLM-as-a-Judge to deliver evidence-grounded, explainable health information across
+        Western Medicine, Traditional Chinese Medicine, Nutrition, and Lifestyle Medicine.
+      </p>
+
+      <div class="team-list">
+        <ul>
+          <li>
+            <span class="member-name">Dr Simon Lau</span>
+            <span class="member-role">Supervisor</span>
+            <div class="member-links">
+              <a href="https://www.linkedin.com/in/simon-lau-boung-yew-138b363b/" target="_blank" rel="noopener noreferrer" class="member-link">LinkedIn</a>
+              <a href="mailto:Simon.Lau@nottingham.edu.my" class="member-link">Simon.Lau@nottingham.edu.my</a>
+            </div>
+          </li>
+          <li>
+            <span class="member-name">Yoonjae Lee</span>
+            <span class="member-major">BSc (Hons) Computer Science with AI</span>
+            <span class="member-role">Research Intern</span>
+            <div class="member-links">
+              <a href="https://www.linkedin.com/in/yoonjae7/" target="_blank" rel="noopener noreferrer" class="member-link">LinkedIn</a>
+              <a href="mailto:hfyyl16@nottingham.edu.my" class="member-link">hfyyl16@nottingham.edu.my</a>
+            </div>
+          </li>
+          <li>
+            <span class="member-name">Changhui Deng</span>
+            <span class="member-major">BSc (Hons) Computer Science with AI</span>
+            <span class="member-role">Research Intern</span>
+            <div class="member-links">
+              <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" class="member-link">LinkedIn</a>
+              <a href="mailto:hcycd1@nottingham.edu.my" class="member-link">hcycd1@nottingham.edu.my</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="section-header">
+        <h2>Research Problem</h2>
+        <p>Current healthcare AI assistants suffer from critical limitations.</p>
+      </div>
+      <ul class="plain-list">
+        <li><strong>Hallucinations</strong> — Models generate plausible but unsupported medical claims without grounding in authoritative sources.</li>
+        <li><strong>Lack of evidence transparency</strong> — Responses rarely cite clinical guidelines, literature, or explain the strength of underlying evidence.</li>
+        <li><strong>Conflicting paradigms</strong> — Systems cannot reconcile recommendations from different medical traditions and knowledge bases.</li>
+        <li><strong>Poor safety governance</strong> — Unsafe advice, contraindications, and unsupported claims often pass through without automated review.</li>
+        <li><strong>Limited explainability</strong> — Users receive single opaque answers rather than transparent reasoning, uncertainty, or disagreement.</li>
+      </ul>
+
+      <div class="vision">
+        <p class="vision-label">Research Vision</p>
+        <p>
+          To develop a trustworthy and explainable healthcare AI ecosystem that intelligently integrates
+          knowledge from multiple medical paradigms, verifies recommendations through evidence-aware AI judges,
+          and provides transparent, safety-conscious health guidance — transforming healthcare AI from a
+          single-answer chatbot into a virtual multidisciplinary advisory board.
+        </p>
+      </div>
+    </section>
+
+    <section id="architecture" class="section section-architecture">
+      <div class="section-header">
+        <h2>System Architecture</h2>
+        <p>From health question to integrated, safety-validated recommendation. Hover each node for details.</p>
+      </div>
+
+      <div class="arch-diagram" id="arch-diagram" aria-label="MediConsensus system architecture">
+        <!-- Layer 1 -->
+        <div class="arch-layer layer-animate" data-layer="1">
+          <div class="arch-node node-blue" tabindex="0"
+               data-tooltip="The entry point of the system. Users submit health questions or case context that trigger the full retrieval, debate, and validation pipeline.">
+            <span class="node-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </span>
+            <div class="node-text">
+              <strong>User</strong>
+              <span>Asks a health question</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+
+        <!-- Layer 2 -->
+        <div class="arch-layer layer-animate" data-layer="2">
+          <div class="arch-node node-green" tabindex="0"
+               data-tooltip="Analyses the user's question to determine intent, required knowledge domains, and which retrieval systems and agents should be activated.">
+            <span class="node-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+            </span>
+            <div class="node-text">
+              <strong>Query Planner</strong>
+              <span>Analyzes the question and plans retrieval and agents</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+
+        <!-- Layer 3 -->
+        <div class="arch-layer arch-layer-dual layer-animate" data-layer="3">
+          <div class="arch-node node-blue arch-node-wide" tabindex="0"
+               data-tooltip="Evidence-grounded RAG for modern medicine. Retrieves from authoritative Western medical sources to support evidence-based recommendations with citations.">
+            <div class="node-text">
+              <strong>MediRAG-West</strong>
+              <span>Modern medicine retrieval</span>
+            </div>
+            <ul class="node-sources">
+              <li>Clinical Guidelines (NICE, WHO)</li>
+              <li>Biomedical Literature (PubMed)</li>
+              <li>Drug Databases</li>
+              <li>Systematic Reviews</li>
+            </ul>
+          </div>
+          <div class="arch-node node-green arch-node-wide" tabindex="0"
+               data-tooltip="Specialised RAG for Traditional Chinese Medicine. Retrieves TCM knowledge including syndrome differentiation, herbal medicine, and acupuncture theory.">
+            <div class="node-text">
+              <strong>TCM-RAG</strong>
+              <span>Traditional Chinese Medicine retrieval</span>
+            </div>
+            <ul class="node-sources">
+              <li>TCM Textbooks &amp; Classics</li>
+              <li>Herbal Medicine Databases</li>
+              <li>Acupuncture &amp; Meridian Knowledge</li>
+              <li>TCM Clinical Guidelines &amp; Studies</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="arch-merge" aria-hidden="true">
+          <div class="merge-branch merge-left"></div>
+          <div class="arch-arrow arch-arrow-merge"><span>↓</span></div>
+          <div class="merge-branch merge-right"></div>
+        </div>
+
+        <!-- Layer 4 -->
+        <div class="arch-layer arch-layer-container layer-debate layer-animate" data-layer="4">
+          <p class="container-label">Multi-Agent Debate</p>
+          <p class="container-desc">Domain-specific agents independently generate recommendations and rationales</p>
+          <div class="arch-row">
+            <div class="arch-node node-blue arch-node-sm" tabindex="0"
+                 data-tooltip="Provides evidence-based recommendations from a modern Western medicine perspective, grounded in retrieved clinical guidelines and literature.">
+              <strong>Western Medicine Agent</strong>
+              <span>Evidence-based modern medicine</span>
+            </div>
+            <div class="arch-node node-green arch-node-sm" tabindex="0"
+                 data-tooltip="Generates recommendations based on TCM theory, syndrome differentiation, herbal knowledge, and constitution analysis.">
+              <strong>TCM Agent</strong>
+              <span>TCM theory, syndrome differentiation, herbal knowledge</span>
+            </div>
+            <div class="arch-node node-orange arch-node-sm" tabindex="0"
+                 data-tooltip="Provides nutrition-related recommendations and dietary guidance aligned with the user's health context.">
+              <strong>Nutrition Agent</strong>
+              <span>Dietary guidance</span>
+            </div>
+            <div class="arch-node node-purple arch-node-sm" tabindex="0"
+                 data-tooltip="Offers lifestyle, behavioural, and wellness guidance to complement medical and nutritional advice.">
+              <strong>Lifestyle Agent</strong>
+              <span>Behavioral and wellness guidance</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+
+        <!-- Layer 5 -->
+        <div class="arch-layer arch-layer-container layer-judge layer-animate" data-layer="5">
+          <p class="container-label">SafeJudge</p>
+          <p class="container-desc">LLM-as-a-Judge evaluates, verifies, and scores all agent outputs</p>
+          <div class="arch-row">
+            <div class="arch-node node-blue arch-node-sm" tabindex="0"
+                 data-tooltip="Checks whether agent recommendations are supported by retrieved evidence and assesses citation quality and factual grounding.">
+              <strong>Evidence Judge</strong>
+              <span>Checks citation quality</span>
+            </div>
+            <div class="arch-node node-green arch-node-sm" tabindex="0"
+                 data-tooltip="Detects potential risks, contraindications, drug interactions, and unsafe advice before responses reach the user.">
+              <strong>Safety Judge</strong>
+              <span>Detects risks and contraindications</span>
+            </div>
+            <div class="arch-node node-orange arch-node-sm" tabindex="0"
+                 data-tooltip="Identifies conflicts between agents and medical paradigms, surfacing areas of disagreement for transparent resolution.">
+              <strong>Conflict Judge</strong>
+              <span>Identifies conflicts between paradigms</span>
+            </div>
+            <div class="arch-node node-purple arch-node-sm" tabindex="0"
+                 data-tooltip="Estimates overall confidence and uncertainty levels, helping users understand how reliable each recommendation is.">
+              <strong>Confidence Judge</strong>
+              <span>Estimates uncertainty levels</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-arrow" aria-hidden="true"><span>↓</span></div>
+
+        <!-- Layer 6 -->
+        <div class="arch-layer layer-animate" data-layer="6">
+          <div class="arch-node node-blue arch-node-wide arch-node-output" tabindex="0"
+               data-tooltip="The final synthesised output combining all agent recommendations and judge evaluations into a transparent, evidence-aware, safety-validated response.">
+            <div class="node-text">
+              <strong>Integrated Response</strong>
+              <span>Synthesized, evidence-aware, and safety-validated recommendation</span>
+            </div>
+            <ul class="node-sources node-output-list">
+              <li>Summary of recommendations</li>
+              <li>Evidence &amp; citations</li>
+              <li>Agreements &amp; disagreements</li>
+              <li>Safety notes</li>
+              <li>Confidence score</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="research" class="section">
+      <div class="section-header">
+        <h2>Research Questions</h2>
+        <p>Key questions guiding the investigation.</p>
+      </div>
+      <ol class="rq-list">
+        <li>Can multi-agent retrieval and reasoning improve the factual accuracy and completeness of healthcare question answering compared with conventional RAG systems?</li>
+        <li>Can LLM-as-a-Judge mechanisms effectively detect hallucinations, unsafe recommendations, and unsupported claims in healthcare AI outputs?</li>
+        <li>How can AI systems reconcile recommendations from different medical paradigms while maintaining transparency and user trust?</li>
+        <li>Does multi-agent debate and consensus-building improve healthcare answer quality compared with single-agent generation?</li>
+        <li>How should healthcare AI communicate evidence strength, uncertainty, and conflicting viewpoints to end users?</li>
+        <li>Can integrative healthcare AI increase user confidence and perceived trustworthiness without sacrificing scientific rigor?</li>
+      </ol>
+    </section>
+  </main>
+
+  <main id="demo-view" class="view-panel" hidden>
+    <section class="demo-section">
+      <p class="eyebrow">MediConsensus Demo</p>
+      <h1 class="demo-title">Choose a consultation mode</h1>
+      <p class="demo-lead">Select which medical knowledge base to query for your health question.</p>
+
+      <div class="demo-options">
+        <button type="button" class="demo-option demo-option-west glass" data-mode="west">
+          <span class="demo-option-label">West Medicine</span>
+          <span class="demo-option-desc">Evidence-based modern medicine via MediRAG-West</span>
+        </button>
+        <button type="button" class="demo-option demo-option-tcm glass" data-mode="tcm">
+          <span class="demo-option-label">TCM</span>
+          <span class="demo-option-desc">Traditional Chinese Medicine via TCM-RAG</span>
+        </button>
+        <button type="button" class="demo-option demo-option-both glass" data-mode="both">
+          <span class="demo-option-label">West Medicine + TCM</span>
+          <span class="demo-option-desc">Integrative dual-paradigm consultation</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 University of Nottingham Research Internship</p>
+    <p class="footer-sub">Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus</p>
+  </footer>
+  <script src="diagram.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
