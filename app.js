@@ -36,22 +36,263 @@
   });
 
   const demoOptions = document.querySelector('.demo-options');
+  const prototypeStatus = document.querySelector('.prototype-status');
+  const tcmConsultation = document.getElementById('tcm-consultation');
+
+  function setDemoMode(mode) {
+    document.querySelectorAll('.demo-option').forEach(function (el) {
+      const active = el.dataset.mode === mode;
+      el.classList.toggle('is-selected', active);
+      el.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
+
+    if (demoOptions) {
+      demoOptions.classList.remove('mode-west', 'mode-tcm', 'mode-both');
+      demoOptions.classList.add('mode-' + mode);
+    }
+
+    const tcmActive = mode === 'tcm';
+    if (tcmConsultation) tcmConsultation.hidden = !tcmActive;
+    if (prototypeStatus) {
+      prototypeStatus.hidden = tcmActive;
+      if (!tcmActive) {
+        const title = prototypeStatus.querySelector('strong');
+        const description = prototypeStatus.querySelector('span:last-child');
+        if (title) title.textContent = 'Not included in this TCM MVP';
+        if (description) description.textContent = 'Select TCM to try the working retrieval prototype. Western and integrative modes remain placeholders.';
+      }
+    }
+  }
 
   document.querySelectorAll('.demo-option').forEach(function (option) {
     option.addEventListener('click', function () {
-      document.querySelectorAll('.demo-option').forEach(function (el) {
-        el.classList.remove('is-selected');
-        el.setAttribute('aria-checked', 'false');
-      });
-      option.classList.add('is-selected');
-      option.setAttribute('aria-checked', 'true');
-
-      if (demoOptions) {
-        demoOptions.classList.remove('mode-west', 'mode-tcm', 'mode-both');
-        demoOptions.classList.add('mode-' + option.dataset.mode);
-      }
+      setDemoMode(option.dataset.mode);
     });
   });
+
+  setDemoMode('tcm');
+
+  const API_BASE_URL = window.MEDIRAG_API_BASE_URL || 'http://localhost:8000';
+  const tcmForm = document.getElementById('tcm-consult-form');
+  const tcmQuestion = document.getElementById('tcm-question');
+  const tcmSubmit = document.getElementById('tcm-submit');
+  const tcmFormMessage = document.getElementById('tcm-form-message');
+  const tcmResults = document.getElementById('tcm-results');
+
+  function makeElement(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  }
+
+  function renderEmpty(container, message) {
+    container.replaceChildren(makeElement('p', 'tcm-empty', message));
+  }
+
+  function renderPatterns(patterns) {
+    const container = document.getElementById('tcm-patterns');
+    if (!container) return;
+    container.replaceChildren();
+    if (!patterns.length) {
+      renderEmpty(container, 'No TCM pattern is suggested for this safety-first response.');
+      return;
+    }
+    patterns.forEach(function (item, index) {
+      const article = makeElement('article', 'tcm-list-item');
+      const header = makeElement('div', 'tcm-list-item-header');
+      header.append(makeElement('span', 'tcm-index', String(index + 1)), makeElement('h4', '', item.pattern));
+      article.append(header, makeElement('p', '', item.rationale));
+      if (item.matching_symptoms && item.matching_symptoms.length) {
+        const matches = makeElement('div', 'tcm-match-list');
+        item.matching_symptoms.forEach(function (symptom) {
+          matches.append(makeElement('span', '', symptom));
+        });
+        article.append(matches);
+      }
+      container.append(article);
+    });
+  }
+
+  function renderFormulas(formulas) {
+    const container = document.getElementById('tcm-formulas');
+    if (!container) return;
+    container.replaceChildren();
+    if (!formulas.length) {
+      renderEmpty(container, 'No herb or formula examples are shown for this response.');
+      return;
+    }
+    formulas.forEach(function (item) {
+      const article = makeElement('article', 'tcm-list-item');
+      const header = makeElement('div', 'tcm-list-item-header');
+      header.append(makeElement('span', 'tcm-type-pill', item.type), makeElement('h4', '', item.name));
+      article.append(header, makeElement('p', '', item.purpose));
+      const warning = makeElement('p', 'tcm-inline-warning', item.safety_warning);
+      article.append(warning);
+      container.append(article);
+    });
+  }
+
+  function renderEvidence(evidence) {
+    const container = document.getElementById('tcm-evidence');
+    if (!container) return;
+    container.replaceChildren();
+    if (!evidence.length) {
+      renderEmpty(container, 'Evidence retrieval was intentionally skipped for this safety response.');
+      return;
+    }
+    evidence.forEach(function (item, index) {
+      const article = makeElement('article', 'tcm-evidence-item');
+      const top = makeElement('div', 'tcm-evidence-top');
+      const sourceBlock = makeElement('div', '');
+      sourceBlock.append(makeElement('span', 'tcm-citation', '[' + (index + 1) + '] ' + item.source_type), makeElement('h4', '', item.title));
+      const score = Math.round(Number(item.relevance_score || 0) * 100);
+      top.append(sourceBlock, makeElement('strong', 'tcm-relevance', score + '% match'));
+      const meter = makeElement('div', 'tcm-relevance-meter');
+      const fill = makeElement('span', '');
+      fill.style.width = Math.max(2, Math.min(100, score)) + '%';
+      meter.append(fill);
+      article.append(top, makeElement('p', '', item.snippet), meter, makeElement('cite', '', item.source));
+      container.append(article);
+    });
+  }
+
+  function renderSafety(notes) {
+    const container = document.getElementById('tcm-safety-notes');
+    if (!container) return;
+    container.replaceChildren();
+    notes.forEach(function (note) {
+      container.append(makeElement('li', '', note));
+    });
+  }
+
+  function renderTCMResult(data) {
+    const score = Math.round(Number(data.confidence.score || 0) * 100);
+    const generationSource = data.generation_source || (data.generation_mode === 'llm' ? 'siliconflow_llm' : data.generation_mode === 'safety' ? 'safety_rule' : 'mock_fallback');
+    const modeLabel = generationSource === 'siliconflow_llm'
+      ? 'AI generated with local evidence'
+      : generationSource === 'safety_rule'
+        ? 'Safety rule'
+        : 'Local medical library fallback';
+    const sourceLabel = generationSource === 'siliconflow_llm'
+      ? 'generation_source: siliconflow_llm'
+      : generationSource === 'safety_rule'
+        ? 'generation_source: safety_rule'
+        : 'generation_source: mock_fallback';
+    const modelLabel = data.llm_model ? 'llm_model: ' + data.llm_model : 'llm_model: local';
+    const groundingLabel = generationSource === 'siliconflow_llm'
+      ? 'Grounding: LLM answer grounded by local retrieved evidence.'
+      : generationSource === 'safety_rule'
+        ? 'Grounding: safety rule response; TCM generation was bypassed.'
+        : 'Grounding: local fallback answer generated from retrieved TCM evidence.';
+
+    document.getElementById('tcm-summary').textContent = data.tcm_perspective;
+    document.getElementById('tcm-grounding-note').textContent = groundingLabel;
+    document.getElementById('tcm-confidence-score').textContent = score + '%';
+    document.getElementById('tcm-confidence-level').textContent = data.confidence.level + ' confidence';
+    document.getElementById('tcm-confidence-reason').textContent = data.confidence.reason;
+    document.getElementById('tcm-disclaimer').textContent = data.disclaimer;
+    document.getElementById('tcm-generation-mode').textContent = modeLabel;
+    document.getElementById('tcm-generation-source').textContent = sourceLabel;
+    document.getElementById('tcm-llm-model').textContent = modelLabel;
+
+    const llmError = document.getElementById('tcm-llm-error');
+    if (llmError) {
+      if (data.llm_error) {
+        llmError.hidden = false;
+        llmError.textContent = data.llm_error === 'LLM_API_KEY is missing'
+          ? 'No LLM API key is configured. This answer is generated from the local TCM medical knowledge base.'
+          : 'The AI provider or network is temporarily unavailable, so this answer is generated from the local TCM medical knowledge base. llm_error: ' + data.llm_error;
+      } else {
+        llmError.hidden = true;
+        llmError.textContent = '';
+      }
+    }
+
+    const urgent = document.getElementById('tcm-urgent');
+    urgent.hidden = !data.urgent;
+    tcmResults.classList.toggle('is-urgent', Boolean(data.urgent));
+    renderPatterns(data.possible_patterns || []);
+    renderFormulas(data.related_herbs_or_formulas || []);
+    renderEvidence(data.evidence || []);
+    renderSafety(data.safety_notes || []);
+    tcmResults.hidden = false;
+    tcmResults.setAttribute('aria-busy', 'false');
+    tcmResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showFormMessage(message) {
+    tcmFormMessage.textContent = message;
+    tcmFormMessage.hidden = false;
+  }
+
+  document.querySelectorAll('.tcm-sample').forEach(function (button) {
+    button.addEventListener('click', function () {
+      tcmQuestion.value = button.dataset.question || '';
+      tcmQuestion.focus();
+      tcmFormMessage.hidden = true;
+    });
+  });
+
+  if (tcmForm) {
+    tcmForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const formData = new FormData(tcmForm);
+      const question = String(formData.get('question') || '').trim();
+      tcmFormMessage.hidden = true;
+
+      if (question.length < 3) {
+        showFormMessage('Please enter a health question of at least 3 characters.');
+        tcmQuestion.focus();
+        return;
+      }
+
+      const payload = {
+        question: question,
+        context: {
+          age: String(formData.get('age') || '').trim(),
+          gender: String(formData.get('gender') || '').trim(),
+          duration: String(formData.get('duration') || '').trim(),
+          medications: String(formData.get('medications') || '').trim(),
+          pregnancy: String(formData.get('pregnancy') || '').trim(),
+          allergies: String(formData.get('allergies') || '').trim()
+        }
+      };
+
+      tcmSubmit.disabled = true;
+      tcmSubmit.classList.add('is-loading');
+      tcmSubmit.querySelector('.tcm-submit-label').textContent = 'Retrieving evidence…';
+      tcmResults.setAttribute('aria-busy', 'true');
+
+      try {
+        const response = await fetch(API_BASE_URL + '/api/tcm/consult', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        let data = {};
+        try {
+          data = await response.json();
+        } catch (_) {
+          throw new Error('The backend returned an unreadable response.');
+        }
+        if (!response.ok) {
+          throw new Error(typeof data.detail === 'string' ? data.detail : 'The consultation could not be completed.');
+        }
+        renderTCMResult(data);
+      } catch (error) {
+        const offline = error instanceof TypeError;
+        showFormMessage(offline
+          ? 'The TCM-RAG backend is not reachable. Start it on http://localhost:8000, then try again.'
+          : error.message || 'Something went wrong. Please try again.');
+        tcmResults.setAttribute('aria-busy', 'false');
+      } finally {
+        tcmSubmit.disabled = false;
+        tcmSubmit.classList.remove('is-loading');
+        tcmSubmit.querySelector('.tcm-submit-label').textContent = 'Run TCM-RAG';
+      }
+    });
+  }
 
   const languageButtons = document.querySelectorAll('.language-btn');
   const translations = {
