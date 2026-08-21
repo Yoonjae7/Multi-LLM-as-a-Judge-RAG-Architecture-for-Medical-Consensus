@@ -1,0 +1,7 @@
+{
+  "name": "medirag-west",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MediRAG-West: Multi-LLM-as-a-Judge RAG demo for Western medicine question answering. Static frontend plus Vercel Edge Functions in /api."
+}

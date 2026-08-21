@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus</title>
-  <meta name="description" content="Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus — University of Nottingham research internship.">
+  <meta name="description" content="Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus, University of Nottingham research internship.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260723-fix">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260820-west-pipeline">
 </head>
 <body>
   <div class="bg-gradient" aria-hidden="true"></div>
@@ -31,6 +31,7 @@
       <a href="#about">About</a>
       <a href="#architecture">Architecture</a>
       <a href="#research">Research</a>
+      <a href="research.html" class="nav-paper">Paper</a>
     </nav>
     <div class="language-switch glass" aria-label="Language mode">
       <button type="button" class="language-btn is-active" data-lang="en" aria-pressed="true">EN</button>
@@ -87,11 +88,11 @@
         <p>Current healthcare AI assistants suffer from critical limitations.</p>
       </div>
       <ul class="plain-list">
-        <li><strong>Hallucinations</strong> — Models generate plausible but unsupported medical claims without grounding in authoritative sources.</li>
-        <li><strong>Lack of evidence transparency</strong> — Responses rarely cite clinical guidelines, literature, or explain the strength of underlying evidence.</li>
-        <li><strong>Conflicting paradigms</strong> — Systems cannot reconcile recommendations from different medical traditions and knowledge bases.</li>
-        <li><strong>Poor safety governance</strong> — Unsafe advice, contraindications, and unsupported claims often pass through without automated review.</li>
-        <li><strong>Limited explainability</strong> — Users receive single opaque answers rather than transparent reasoning, uncertainty, or disagreement.</li>
+        <li><strong>Hallucinations.</strong> Models generate plausible but unsupported medical claims without grounding in authoritative sources.</li>
+        <li><strong>Lack of evidence transparency.</strong> Responses rarely cite clinical guidelines, literature, or explain the strength of underlying evidence.</li>
+        <li><strong>Conflicting paradigms.</strong> Systems cannot reconcile recommendations from different medical traditions and knowledge bases.</li>
+        <li><strong>Poor safety governance.</strong> Unsafe advice, contraindications, and unsupported claims often pass through without automated review.</li>
+        <li><strong>Limited explainability.</strong> Users receive single opaque answers rather than transparent reasoning, uncertainty, or disagreement.</li>
       </ul>
 
       <div class="vision">
@@ -99,7 +100,7 @@
         <p>
           To develop a trustworthy and explainable healthcare AI ecosystem that intelligently integrates
           knowledge from multiple medical paradigms, verifies recommendations through evidence-aware AI judges,
-          and provides transparent, safety-conscious health guidance — transforming healthcare AI from a
+          and provides transparent, safety-conscious health guidance, transforming healthcare AI from a
           single-answer chatbot into a virtual multidisciplinary advisory board.
         </p>
       </div>
@@ -328,9 +329,9 @@
             <div>
               <p class="west-kicker">MediRAG-West · Research Prototype</p>
               <h2 id="west-consultation-title">Evidence-Based Western Medicine</h2>
-              <p>Ask a health question. Multiple specialist AI agents retrieve clinical evidence, debate, and reach a safety-checked consensus — simulating how our Multi-LLM framework works.</p>
+              <p>Ask a health question and watch it move through the system: the Query Planner, evidence retrieval, three specialist agents, and the four SafeJudge checks, before a single answer is produced.</p>
             </div>
-            <span class="west-live-badge"><span aria-hidden="true"></span><span class="west-live-label">Local Demo</span></span>
+            <span class="west-live-badge"><span aria-hidden="true"></span><span class="west-live-label">Live AI Backend</span></span>
           </div>
 
           <form id="west-consult-form" novalidate>
@@ -346,7 +347,16 @@
               <button type="button" class="west-sample" data-question="I have been getting frequent headaches and feeling unusually tired for the past 3 weeks.">Persistent headache + fatigue</button>
               <button type="button" class="west-sample" data-question="I experience tightness in my chest when climbing stairs or walking fast. It goes away with rest.">Chest tightness on exertion</button>
               <button type="button" class="west-sample" data-question="My blood pressure reading was 145/92. I am 48 years old. Should I be concerned?">Elevated blood pressure (145/92)</button>
+              <button type="button" class="west-sample is-danger" data-question="I have crushing chest pain and I cannot breathe properly.">Safety triage path</button>
             </div>
+
+            <p class="west-paths-note">
+              Real specialist agents and judges answer your question live from a local evidence library covering
+              headaches, chest pain, blood pressure, back pain, colds, allergies, digestion, sleep and anxiety.
+              The fourth sample shows what happens when the system spots emergency signs; a question outside the
+              library shows what happens when it finds no evidence. Both are deliberate, and are explained in the
+              <a href="research.html">research paper</a>.
+            </p>
 
             <div class="west-form-footer">
               <p><strong>Research use only.</strong> Not a diagnosis or prescription. Emergencies require immediate professional care.</p>
@@ -359,66 +369,52 @@
           </form>
         </div>
 
-        <!-- Pipeline visualisation -->
-        <div id="west-viz" class="west-viz glass" hidden>
-          <div class="west-viz-header">
-            <h3 class="west-viz-title">Multi-LLM Reasoning Pipeline</h3>
-            <p class="west-viz-desc">Visualisation of how the multi-agent system processes your question in real time</p>
+        <!-- ════ PIPELINE RUNTIME ════ -->
+        <div id="west-viz" class="west-runtime" hidden>
+
+          <div class="west-runtime-head">
+            <div class="west-runtime-title">
+              <h3>Watch it work</h3>
+              <p>This is the same flow as the architecture diagram on the Home page.</p>
+            </div>
+            <div class="west-runtime-meta">
+              <span class="west-clock" id="west-clock">0.0s</span>
+              <div class="west-runtime-state" id="west-runtime-state" data-state="running">
+                <span class="west-state-dot" aria-hidden="true"></span>
+                <span id="west-runtime-state-label">Running</span>
+              </div>
+            </div>
           </div>
 
-          <!-- Canvas neural-net animation -->
-          <canvas id="west-viz-canvas" class="west-viz-canvas" aria-label="Neural network visualisation of multi-LLM reasoning" role="img"></canvas>
+          <!-- Six stages, matching the architecture diagram -->
+          <ol class="west-rail" id="west-rail">
+            <li class="west-rail-step" data-stage="question"  data-status="waiting"><span class="west-rail-dot"></span><span class="west-rail-name">Question</span></li>
+            <li class="west-rail-step" data-stage="planner"   data-status="waiting"><span class="west-rail-dot"></span><span class="west-rail-name">Query Planner</span></li>
+            <li class="west-rail-step" data-stage="retrieval" data-status="waiting"><span class="west-rail-dot"></span><span class="west-rail-name">MediRAG-West</span></li>
+            <li class="west-rail-step" data-stage="debate"    data-status="waiting"><span class="west-rail-dot"></span><span class="west-rail-name">Agent Debate</span></li>
+            <li class="west-rail-step" data-stage="judge"     data-status="waiting"><span class="west-rail-dot"></span><span class="west-rail-name">SafeJudge</span></li>
+            <li class="west-rail-step" data-stage="response"  data-status="waiting"><span class="west-rail-dot"></span><span class="west-rail-name">Response</span></li>
+          </ol>
 
-          <!-- Pipeline step tracker -->
-          <div class="west-pipeline" id="west-pipeline-steps">
-            <div class="west-step" id="wstep-query" data-status="waiting">
-              <div class="west-step-icon">
-                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4zm-.75 3.75a.75.75 0 011.5 0v3.5l2.25 1.3a.75.75 0 01-.75 1.3L9.5 14.2a.75.75 0 01-.25-.6V9.75z"/></svg>
-              </div>
-              <div class="west-step-text">
-                <strong>Query Planning</strong>
-                <span>Analysing question intent</span>
-              </div>
+          <div class="west-net-frame">
+            <canvas id="west-net" class="west-net-canvas" role="img"
+              aria-label="Diagram showing the question flowing through the query planner, evidence retrieval, specialist agents and judges to a final response"></canvas>
+          </div>
+
+          <!-- Plain-language explanation of the current stage -->
+          <p class="west-net-caption">
+            <strong id="west-net-stage">Getting ready</strong>
+            <span id="west-net-explain">Ask a question above to start.</span>
+          </p>
+
+          <div class="west-runtime-grid">
+            <div class="west-dispatch">
+              <h4 class="west-sub-head">Agents</h4>
+              <div id="west-dispatch-list" class="west-dispatch-list"></div>
             </div>
-            <div class="west-step-connector"></div>
-            <div class="west-step" id="wstep-retrieval" data-status="waiting">
-              <div class="west-step-icon">
-                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 3a6 6 0 100 12A6 6 0 009 3zM1 9a8 8 0 1114.32 4.906l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387A8 8 0 011 9z"/></svg>
-              </div>
-              <div class="west-step-text">
-                <strong>RAG Retrieval</strong>
-                <span>NICE, PubMed, WHO guidelines</span>
-              </div>
-            </div>
-            <div class="west-step-connector"></div>
-            <div class="west-step" id="wstep-debate" data-status="waiting">
-              <div class="west-step-icon">
-                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 011-1h6a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm7 8a1 1 0 011-1h3a1 1 0 011 1v2a1 1 0 01-1 1h-3a1 1 0 01-1-1v-2zM2 12a1 1 0 011-1h3a1 1 0 011 1v2a1 1 0 01-1 1H3a1 1 0 01-1-1v-2z"/></svg>
-              </div>
-              <div class="west-step-text">
-                <strong>Agent Debate</strong>
-                <span>West · Nutrition · Lifestyle</span>
-              </div>
-            </div>
-            <div class="west-step-connector"></div>
-            <div class="west-step" id="wstep-judging" data-status="waiting">
-              <div class="west-step-icon">
-                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1a9 9 0 100 18A9 9 0 0010 1zm0 2a7 7 0 110 14A7 7 0 0110 3zm1 4a1 1 0 00-2 0v4a1 1 0 00.293.707l2.5 2.5a1 1 0 001.414-1.414L11 11.586V7z"/></svg>
-              </div>
-              <div class="west-step-text">
-                <strong>SafeJudge Panel</strong>
-                <span>Evidence · Safety · Conflict · Confidence</span>
-              </div>
-            </div>
-            <div class="west-step-connector"></div>
-            <div class="west-step" id="wstep-consensus" data-status="waiting">
-              <div class="west-step-icon">
-                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
-              </div>
-              <div class="west-step-text">
-                <strong>Consensus</strong>
-                <span>Integrated response</span>
-              </div>
+            <div class="west-console">
+              <h4 class="west-sub-head">Activity</h4>
+              <div id="west-console-log" class="west-console-log" role="log" aria-live="polite" aria-label="Activity log"></div>
             </div>
           </div>
         </div>
@@ -427,64 +423,67 @@
         <section id="west-results" class="west-results" aria-live="polite" hidden>
           <!-- Urgent banner -->
           <div id="west-urgent-banner" class="west-urgent-banner" role="alert" hidden>
-            <span class="west-urgent-icon">⚠️</span>
+            <span class="west-urgent-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            </span>
             <div>
               <strong>Urgent Safety Guidance</strong>
               <span>This response prioritises immediate professional medical care. Please seek help now.</span>
             </div>
           </div>
 
-          <!-- Agent cards -->
-          <div class="west-results-section">
-            <div class="west-section-head">
-              <h3>Specialist Agent Opinions</h3>
-              <p>Each agent independently generated recommendations from retrieved clinical evidence</p>
-            </div>
-            <div id="west-agents-grid" class="west-agents-grid"></div>
-          </div>
-
-          <!-- Judge scores -->
-          <div class="west-results-section">
-            <div class="west-section-head">
-              <h3>SafeJudge Evaluation</h3>
-              <p>LLM-as-a-Judge evaluates evidence quality, safety, conflicts, and confidence across all agent outputs</p>
-            </div>
-            <div id="west-judges-grid" class="west-judges-grid"></div>
-          </div>
-
-          <!-- Consensus -->
+          <!-- 1 · The answer -->
           <div class="west-consensus glass">
             <div class="west-consensus-top">
               <div class="west-consensus-meta">
-                <span class="west-consensus-kicker">Integrated Consensus</span>
-                <span id="west-evidence-count" class="west-evidence-count-badge">— evidence sources</span>
+                <span class="west-consensus-kicker">Integrated Response</span>
+                <span id="west-evidence-count" class="west-evidence-count-badge">Sources pending</span>
               </div>
-              <div class="west-conf-display" aria-label="Consensus confidence score">
-                <strong id="west-conf-score">—%</strong>
+              <div class="west-conf-display" aria-label="Confidence score">
+                <strong id="west-conf-score">0%</strong>
                 <span id="west-conf-label">Confidence</span>
               </div>
             </div>
             <p id="west-consensus-summary" class="west-consensus-body"></p>
-
-            <details class="west-accordion">
-              <summary>View cited sources</summary>
-              <ul id="west-sources-list" class="west-sources"></ul>
-            </details>
           </div>
 
-          <!-- Safety notes -->
+          <!-- 2 · Safety notes -->
           <div class="west-safety-section glass">
             <div class="west-safety-head">
-              <span class="west-safety-icon">🛡</span>
-              <div>
-                <p class="west-safety-kicker">Safety First</p>
-                <h3>Key Safety Notes</h3>
-              </div>
+              <span class="west-safety-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+              </span>
+              <h3>Safety notes</h3>
             </div>
             <ul id="west-safety-list" class="west-safety-list"></ul>
           </div>
 
-          <p class="west-disclaimer">Educational research prototype only — not a diagnosis or prescription, and not a substitute for qualified medical care.</p>
+          <!-- 3 · How the answer was reached -->
+          <div id="west-detail" class="west-detail" hidden>
+            <h3 class="west-detail-title">How this answer was reached</h3>
+
+            <div class="west-results-section">
+              <p class="west-step-label"><span class="west-step-num">1</span>Each agent answered from the same evidence</p>
+              <div id="west-agents-grid" class="west-agents-grid"></div>
+            </div>
+
+            <div class="west-results-section" id="west-conflict-section" hidden>
+              <p class="west-step-label"><span class="west-step-num">2</span>Where they disagreed</p>
+              <ul id="west-conflict-list" class="west-conflict-list"></ul>
+            </div>
+
+            <div class="west-results-section">
+              <p class="west-step-label"><span class="west-step-num">3</span>Four judges scored the answers</p>
+              <div id="west-judges-grid" class="west-judges-grid"></div>
+            </div>
+
+            <details class="west-accordion">
+              <summary>Show the sources that were used</summary>
+              <div id="west-evidence-grid" class="west-evidence-grid"></div>
+            </details>
+          </div>
+
+          <p class="west-disclaimer">Educational research prototype only. Not a diagnosis or prescription, and not a substitute for qualified medical care.</p>
         </section>
       </div>
       <!-- ════ END WEST CONSULTATION ════ -->
@@ -636,8 +635,23 @@
     <p>&copy; 2026 University of Nottingham Research Internship</p>
     <p class="footer-sub">Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus - website by Yoonjae Lee</p>
   </footer>
+  <!-- ════ RESEARCH PAPER FAB ════ -->
+  <a href="research.html" class="research-fab" aria-label="Read the research paper">
+    <span class="research-fab-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <path d="M14 2v6h6"/>
+        <path d="M8 13h8M8 17h5"/>
+      </svg>
+    </span>
+    <span class="research-fab-text">
+      <strong>Research Paper</strong>
+      <small>Architecture &amp; model selection</small>
+    </span>
+  </a>
+
   <script src="diagram.js"></script>
-  <script src="west.js?v=20260803-west-prototype"></script>
+  <script src="west.js?v=20260820-west-pipeline"></script>
   <script src="app.js?v=20260712-tcm-research"></script>
 </body>
 </html>

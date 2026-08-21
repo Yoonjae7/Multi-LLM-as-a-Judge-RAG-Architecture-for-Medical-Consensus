@@ -35,6 +35,19 @@
     });
   });
 
+  // Deep link from research.html ("Live demo") or a #demo hash opens the demo view.
+  (function openDemoIfRequested() {
+    var requested = false;
+    try {
+      if (sessionStorage.getItem('medirag:openDemo') === '1') {
+        sessionStorage.removeItem('medirag:openDemo');
+        requested = true;
+      }
+    } catch (err) { /* storage unavailable */ }
+    if (window.location.hash === '#demo') requested = true;
+    if (requested) setView('demo');
+  })();
+
   let currentLanguage = 'en';
   let currentResultData = null;
   const demoOptions = document.querySelector('.demo-options');
