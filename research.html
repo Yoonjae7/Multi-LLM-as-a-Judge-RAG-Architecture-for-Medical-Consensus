@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Multi-LLM-as-a-Judge RAG Architecture for Western Medicine, Research Report</title>
-<meta name="description" content="A research report by Yoonjae Lee on building a multi-LLM-as-a-judge retrieval-augmented system for evidence-grounded Western medicine question answering.">
+<meta name="description" content="A research report by Yoonjae Lee on building a multi-LLM-as-a-judge system for evidence-grounded Western medicine question answering, using free AI models.">
 <meta name="author" content="Yoonjae Lee">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Top bar ─────────────────────────────────────────────────── */
 .paper-bar {
   position: sticky; top: 0; z-index: 40;
   display: flex; align-items: center; justify-content: space-between;
@@ -76,7 +75,6 @@ body {
 .progress-rail { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 50; pointer-events: none; }
 .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), #0ea5e9); transition: width 0.1s linear; }
 
-/* ── Layout ──────────────────────────────────────────────────── */
 .paper-shell {
   display: grid;
   grid-template-columns: 14rem minmax(0, 1fr);
@@ -109,7 +107,6 @@ body {
   min-width: 0;
 }
 
-/* ── Title block ─────────────────────────────────────────────── */
 .paper-head { border-bottom: 1px solid var(--rule); padding-bottom: 1.7rem; margin-bottom: 1.7rem; }
 .paper-venue { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.65rem; font-weight: 600; color: var(--accent); margin: 0 0 0.9rem; }
 .paper-title {
@@ -124,7 +121,6 @@ body {
 .paper-tag { padding: 0.24rem 0.6rem; border: 1px solid var(--rule); border-radius: 5px; background: var(--canvas); font-size: 0.7rem; font-weight: 500; color: var(--ink-soft); }
 .paper-tag.is-accent { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
 
-/* ── Summary ─────────────────────────────────────────────────── */
 .summary {
   background: var(--canvas);
   border: 1px solid var(--rule);
@@ -137,7 +133,6 @@ body {
 .summary p { margin: 0 0 0.75rem; font-size: 0.93rem; line-height: 1.7; color: var(--ink-soft); }
 .summary p:last-child { margin-bottom: 0; }
 
-/* ── Sections ────────────────────────────────────────────────── */
 .paper section { margin-bottom: 2.5rem; scroll-margin-top: 5.5rem; }
 .paper h2 {
   font-family: 'Newsreader', Georgia, serif;
@@ -167,7 +162,6 @@ code {
 .cite { font-size: 0.72em; vertical-align: super; line-height: 0; font-weight: 600; color: var(--accent); text-decoration: none; padding: 0 0.06em; }
 .cite:hover { text-decoration: underline; }
 
-/* ── Callouts ────────────────────────────────────────────────── */
 .callout {
   border: 1px solid var(--rule);
   border-left: 3px solid var(--ink-faint);
@@ -186,7 +180,33 @@ code {
 .callout.is-limit { border-left-color: var(--red); background: #fef2f2; }
 .callout.is-limit .callout-label { color: var(--red); }
 
-/* ── Figure and tables ───────────────────────────────────────── */
+/* Verbatim prompt text, visually distinct from our own prose */
+.prompt-box {
+  margin: 0.9rem 0 1.3rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--purple);
+  border-radius: 0 8px 8px 0;
+  background: #faf8ff;
+  max-width: var(--measure);
+}
+.prompt-box-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--purple);
+  margin-bottom: 0.45rem;
+}
+.prompt-box p {
+  margin: 0;
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: #3b2f52;
+}
+
 figure { margin: 1.6rem 0; }
 figure svg { display: block; width: 100%; height: auto; }
 .fig-frame { border: 1px solid var(--rule); border-radius: 10px; background: #fcfdfe; padding: 1.2rem; overflow-x: auto; }
@@ -194,7 +214,7 @@ figcaption { margin-top: 0.7rem; font-size: 0.79rem; color: var(--ink-faint); li
 figcaption strong { color: var(--ink); font-weight: 600; }
 
 .table-wrap { overflow-x: auto; margin: 1.3rem 0; border: 1px solid var(--rule); border-radius: 10px; }
-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 30rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 26rem; }
 thead th {
   background: var(--canvas); text-align: left; font-weight: 600;
   font-size: 0.71rem; text-transform: uppercase; letter-spacing: 0.05em;
@@ -205,12 +225,7 @@ tbody td { padding: 0.62rem 0.85rem; border-bottom: 1px solid var(--rule-soft); 
 tbody tr:last-child td { border-bottom: none; }
 td strong { color: var(--ink); font-weight: 600; }
 .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pill { display: inline-block; padding: 0.12rem 0.48rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
-.pill.t1 { background: #ecfdf5; color: var(--green); }
-.pill.t2 { background: var(--accent-soft); color: var(--accent); }
-.pill.t3 { background: #fef3c7; color: var(--amber); }
 
-/* ── References ──────────────────────────────────────────────── */
 .refs ol { padding-left: 0; list-style: none; counter-reset: ref; max-width: none; }
 .refs li {
   counter-increment: ref; position: relative;
@@ -248,7 +263,7 @@ td strong { color: var(--ink); font-weight: 600; }
   body { background: #fff; }
   .paper-shell { display: block; max-width: none; padding: 0; }
   .paper { border: none; padding: 0; }
-  figure, .table-wrap, .callout { break-inside: avoid; }
+  figure, .table-wrap, .callout, .prompt-box { break-inside: avoid; }
 }
 </style>
 </head>
@@ -282,14 +297,13 @@ td strong { color: var(--ink); font-weight: 600; }
     <p class="toc-label">Contents</p>
     <ol>
       <li><a href="#summary">Summary</a></li>
-      <li><a href="#s1">1 &nbsp;The problem</a></li>
-      <li><a href="#s2">2 &nbsp;What others have done</a></li>
-      <li><a href="#s3">3 &nbsp;Choosing a model for each role</a></li>
-      <li><a href="#s4">4 &nbsp;How the system works</a></li>
-      <li><a href="#s5">5 &nbsp;Confidence and safety</a></li>
-      <li><a href="#s6">6 &nbsp;How we would test it</a></li>
-      <li><a href="#s7">7 &nbsp;Limitations</a></li>
-      <li><a href="#s8">8 &nbsp;Conclusion</a></li>
+      <li><a href="#s1">1 &nbsp;Why we built this</a></li>
+      <li><a href="#s2">2 &nbsp;The AI models we used</a></li>
+      <li><a href="#s3">3 &nbsp;How the system works</a></li>
+      <li><a href="#s4">4 &nbsp;The prompts we wrote</a></li>
+      <li><a href="#s5">5 &nbsp;Problems we ran into</a></li>
+      <li><a href="#s6">6 &nbsp;Limitations</a></li>
+      <li><a href="#s7">7 &nbsp;Conclusion</a></li>
       <li><a href="#refs">References</a></li>
     </ol>
   </nav>
@@ -298,7 +312,7 @@ td strong { color: var(--ink); font-weight: 600; }
 
     <header class="paper-head">
       <p class="paper-venue">University of Nottingham Malaysia · Research Internship 2026</p>
-      <h1 class="paper-title">Building a Multi-LLM-as-a-Judge RAG System for Evidence-Grounded Western Medicine</h1>
+      <h1 class="paper-title">Building a Multi-LLM-as-a-Judge System for Western Medicine Question Answering</h1>
       <p class="paper-authors">Yoonjae Lee</p>
       <p class="paper-affil">School of Computer Science, University of Nottingham Malaysia</p>
       <p class="paper-affil">BSc (Hons) Computer Science with Artificial Intelligence</p>
@@ -313,312 +327,94 @@ td strong { color: var(--ink); font-weight: 600; }
     <section id="summary" class="summary">
       <h2>Summary</h2>
       <p>
-        Language models answer health questions fluently but unreliably. They state
-        things confidently without a source, they give one answer where a clinician would weigh
-        several considerations, and they rarely signal when the evidence behind an answer is thin.
+        AI chatbots often answer health questions confidently even when they are not sure they are
+        right, and they do not show where the answer came from. We built MediRAG-West to fix that.
+        Instead of one AI answering, three separate AI agents answer the same question from the
+        same evidence, then a panel of four AI judges scores those answers before anything is shown
+        to the user. If the system cannot find good evidence, or the question is an emergency, it
+        stops and says so instead of guessing.
       </p>
       <p>
-        This report describes <strong>MediRAG-West</strong>, the Western medicine part of our
-        MediRAG-Judge system. A question goes to a query planner, then to a retrieval step that
-        pulls real clinical evidence, then to three specialist agents that answer independently
-        from that same evidence. Four judges score those answers for evidence quality, safety,
-        conflict and confidence, and only then is a single answer produced, carrying a confidence
-        score, its citations, and any disagreement the agents did not resolve.
-      </p>
-      <p>
-        The report makes two arguments. First, that you should <strong>pick a different model
-        for each role</strong> rather than using the best available model everywhere, and that
-        the standard medical benchmark, MedQA, is no longer useful for making that choice.
-        Second, that <strong>refusing to answer has to be designed in</strong>, because a system
-        that cannot decline cannot be trusted when it does not decline.
+        We used two free AI providers: Groq for the three agents, and Google Gemini for the four
+        judges. This report explains why we split it that way, what we actually told each AI to do,
+        what went wrong while building it, and what the system still cannot do.
       </p>
     </section>
 
     <!-- ══════ 1 ══════ -->
     <section id="s1">
-      <h2><span class="sec-num">1</span>The problem</h2>
-
+      <h2><span class="sec-num">1</span>Why we built this</h2>
       <p>
-        Health questions are among the most common things people ask a language model, and among
-        the worst suited to how language models answer. Ask about chest tightness on exertion and
-        you get a well-formed paragraph whether or not the model has any grounding for what is in
-        it. The failure is rarely a wrong fact stated plainly. It is a plausible fact stated with
-        unearned confidence, without a citation, and without any hint that the model is at the
-        edge of what it knows.
+        A single AI chatbot answering a health question has three problems. It states things
+        confidently with no source, so you cannot check it. It gives one merged opinion where a
+        real doctor would weigh a few possibilities. And it will happily answer things it should
+        not, like an emergency, instead of telling you to get help immediately.
       </p>
-
-      <p>Four problems come up repeatedly in the literature, and they shape everything below.</p>
-
-      <ul>
-        <li>
-          <strong>Made-up facts.</strong> Medical hallucination is measurable and persistent. The
-          Med-HALT benchmark<a href="#ref-1" class="cite">[1]</a> builds tests from medical exam
-          data across several countries and finds large differences between models in how readily
-          they assert things they cannot support. The problem does not go away at frontier scale.
-        </li>
-        <li>
-          <strong>No visible evidence.</strong> A fluent answer with no traceable source cannot be
-          checked by the person reading it. Retrieval-augmented generation<a href="#ref-2" class="cite">[2]</a>
-          fixes this in principle, but only if the generated text is genuinely constrained to what
-          was retrieved rather than just displayed next to it.
-        </li>
-        <li>
-          <strong>One opaque answer.</strong> Clinical reasoning weighs competing considerations.
-          Showing a single merged answer throws away the disagreement, which is often the most
-          informative part, because disagreement is what signals uncertainty.
-        </li>
-        <li>
-          <strong>Safety left to chance.</strong> Emergencies and drug interactions need
-          predictable handling. A system that relies on the generating model to notice that a
-          question describes a stroke has already made an unsafe design choice.
-        </li>
-      </ul>
-
       <p>
-        Each has a known partial fix. Retrieval grounds claims in real
-        sources<a href="#ref-2" class="cite">[2]</a><a href="#ref-3" class="cite">[3]</a>, having
-        several agents debate improves factual accuracy over a single
-        model<a href="#ref-4" class="cite">[4]</a>, models used as judges agree with human
-        evaluators reasonably well<a href="#ref-5" class="cite">[5]</a>, and giving a model an
-        explicit option to decline makes it decline more
-        appropriately<a href="#ref-6" class="cite">[6]</a>. The open question this report
-        addresses is how to combine them into one pipeline without the combination itself becoming
-        the source of error, and which model belongs in which position.
+        Other researchers have already shown partial fixes for each of these. Giving a model
+        real documents to read before it answers reduces made-up facts<a href="#ref-1" class="cite">[1]</a>.
+        Having a few AI agents answer independently and then compare notes improves accuracy over
+        one agent alone<a href="#ref-2" class="cite">[2]</a>. Using an AI to grade another AI's
+        answer works reasonably well, roughly as well as two humans agree with each
+        other<a href="#ref-3" class="cite">[3]</a>. And medical hallucination is a known, measured
+        problem that does not go away just because a model is bigger<a href="#ref-4" class="cite">[4]</a>.
       </p>
-
+      <p>
+        Nobody had put all four of these together into one small, working, free system. That is
+        what this project does.
+      </p>
       <div class="callout is-key">
         <span class="callout-label">Scope</span>
         <p>
-          This report covers the Western medicine module only. The Traditional Chinese Medicine
-          module, the reconciliation between the two traditions, and the combined dual-medicine
-          answer are outside its scope and are not claimed as built.
+          This report only covers the Western medicine part of the project, called MediRAG-West.
+          A separate Traditional Chinese Medicine module exists in the same repository but is not
+          part of this report. MediRAG-West gives health information, not a diagnosis or a
+          treatment plan, which keeps it outside the rules that apply to regulated medical
+          software<a href="#ref-6" class="cite">[6]</a>.
         </p>
       </div>
     </section>
 
     <!-- ══════ 2 ══════ -->
     <section id="s2">
-      <h2><span class="sec-num">2</span>What others have done</h2>
-
-      <h3>Retrieval in medicine</h3>
+      <h2><span class="sec-num">2</span>The AI models we used</h2>
       <p>
-        Retrieval-augmented generation<a href="#ref-2" class="cite">[2]</a> feeds the model
-        documents fetched at the moment of asking, which separates factual content from what is
-        baked into the model weights. In medicine that matters twice over, because clinical
-        guidance changes continuously and every claim needs a source someone can look up.
+        We used two different AI providers on purpose, not the same one for everything.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Job</th><th>Model</th><th>Provider</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td>Emergency check</td><td>None, plain code</td><td>Runs in the browser</td><td>Free</td></tr>
+            <tr><td>3 specialist agents</td><td>Llama 3.3 70B</td><td>Groq</td><td>Free tier</td></tr>
+            <tr><td>4 SafeJudge judges</td><td>Gemini 2.5 Flash-Lite</td><td>Google</td><td>Free tier</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Both Groq and Gemini offer a free tier that needs no credit card, which is what makes this
+        project realistically deployable by a student rather than something that only works with a
+        company's budget.
       </p>
       <p>
-        The strongest evidence comes from Xiong et al.<a href="#ref-3" class="cite">[3]</a>, who
-        built MIRAGE, a benchmark of 7,663 medical questions, and tested 41 combinations of corpus,
-        retriever and model. They report accuracy gains of up to <strong>18 percentage points</strong>
-        over standard prompting, enough to lift a mid-tier model to the level of a much stronger
-        model used without retrieval. They also found that more retrieved text is not simply
-        better, and reproduced the "lost in the middle" effect<a href="#ref-7" class="cite">[7]</a>,
-        where evidence placed in the centre of a long context gets used less reliably than evidence
-        at either end. Both findings shaped our retrieval design.
+        The reason for splitting agents and judges across two different companies is not just cost.
+        AI models are known to be a little biased in favour of answers that look like their own
+        writing style<a href="#ref-3" class="cite">[3]</a>. If a judge and an agent were the same
+        model, the judge might rate that agent's writing style more kindly without meaning to. Using
+        Groq for agents and Gemini for judges means a judge is never grading its own kind.
       </p>
       <p>
-        Clinically, Almanac<a href="#ref-8" class="cite">[8]</a> is the strongest demonstration so
-        far. It was tested against standard models on 314 clinical questions across nine
-        specialties, scored by board-certified clinicians, and showed significant gains in
-        factuality. It establishes that retrieval produces quality differences clinicians can
-        actually see, not just benchmark differences.
-      </p>
-
-      <h3>Several agents instead of one</h3>
-      <p>
-        Du et al.<a href="#ref-4" class="cite">[4]</a> showed that having several model instances
-        propose answers and then debate them improves factual accuracy and reduces hallucination.
-        In medicine specifically, MedAgents<a href="#ref-9" class="cite">[9]</a> assigns
-        role-played domain experts to a multi-round discussion without any fine-tuning, and
-        MDAgents<a href="#ref-10" class="cite">[10]</a> adds the useful idea that the collaboration
-        structure should adapt to how hard the question is. MDAgents reports best performance on
-        seven of ten benchmarks and an average accuracy gain of 11.8% for group work with a
-        moderator and outside knowledge.
-      </p>
-      <p>
-        The counter-evidence deserves equal weight. Multi-agent systems are not free, and recent
-        work questions whether they beat a well-tuned single agent once you account for the
-        cost<a href="#ref-11" class="cite">[11]</a>. Our view is that in this domain the ensemble
-        earns its place less through accuracy than through <strong>visibility</strong>. The
-        disagreement between agents is itself a safety signal we want to show the user, and in a
-        single-agent design that signal does not exist at all.
-      </p>
-
-      <h3>Models as judges</h3>
-      <p>
-        Zheng et al.<a href="#ref-5" class="cite">[5]</a> established the reference result. Strong
-        models used as judges reach about <strong>85% agreement with human evaluators</strong>,
-        which is higher than the roughly 81% agreement humans reach with each other. The same work
-        catalogues the failure modes any judge design has to defend against: preferring whichever
-        answer came first, preferring longer answers, and preferring their own output.
-      </p>
-      <p>
-        Later large-scale audits are more cautious. Measured properly, agreement scores overstate
-        how well judges actually discriminate, judge rankings shift between benchmarks, and a judge
-        can be highly consistent while still being badly biased by ordering<a href="#ref-12" class="cite">[12]</a>.
-        A judge that is consistent is not therefore correct. This is why our judges score against
-        written rubrics rather than giving free-form opinions.
-      </p>
-      <p>
-        For health specifically, HealthBench<a href="#ref-13" class="cite">[13]</a> is the most
-        relevant instrument: 5,000 multi-turn health conversations scored against 48,562 criteria
-        written by 262 physicians, covering things like emergency referral and behaviour under
-        uncertainty. Its themes map almost directly onto what our judges score.
+        The emergency check does not use AI at all. It is a plain list of warning phrases checked
+        in the browser before anything is sent anywhere. We chose this on purpose: an emergency
+        check needs to be predictable and instant, not something that depends on how a language
+        model happens to interpret a sentence that day.
       </p>
     </section>
 
     <!-- ══════ 3 ══════ -->
     <section id="s3">
-      <h2><span class="sec-num">3</span>Choosing a model for each role</h2>
-
-      <p>
-        The usual approach is to pick the highest-scoring model available and use it everywhere.
-        That is expensive, and we think it is also wrong. The pipeline contains jobs with genuinely
-        different requirements, and for some of them the strongest model is not the right choice.
-      </p>
-
-      <h3>The benchmarks are not interchangeable</h3>
-      <p>
-        A benchmark score is only useful if the benchmark measures the thing the job needs.
-        Medical evaluation contains instruments that measure quite different things, and treating
-        them as one number leads to bad decisions.
-      </p>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Benchmark</th><th>Size</th><th>What it measures</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>MedQA</strong><a href="#ref-14" class="cite">[14]</a></td>
-              <td class="num">12,723 items</td>
-              <td>US licensing exam recall and reasoning, multiple choice. Now saturated.</td>
-            </tr>
-            <tr>
-              <td><strong>MedXpertQA</strong><a href="#ref-15" class="cite">[15]</a></td>
-              <td class="num">4,460 items</td>
-              <td>Expert-level reasoning across 17 specialties, built specifically because MedQA got too easy.</td>
-            </tr>
-            <tr>
-              <td><strong>HealthBench</strong><a href="#ref-13" class="cite">[13]</a></td>
-              <td class="num">5,000 conversations</td>
-              <td>Realistic multi-turn dialogue scored against physician rubrics. Closest to how the system is actually used.</td>
-            </tr>
-            <tr>
-              <td><strong>Med-HALT</strong><a href="#ref-1" class="cite">[1]</a></td>
-              <td class="num">Varies</td>
-              <td>How readily a model asserts things it cannot support.</td>
-            </tr>
-            <tr>
-              <td><strong>MIRAGE</strong><a href="#ref-3" class="cite">[3]</a></td>
-              <td class="num">7,663 questions</td>
-              <td>Performance with retrieval switched on, which is the setting we actually deploy in.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="callout is-warn">
-        <span class="callout-label">MedQA is no longer a useful test</span>
-        <p>
-          Med-PaLM 2 reported 86.5% and GPT-4 with Medprompt reported
-          90.2%<a href="#ref-16" class="cite">[16]</a><a href="#ref-17" class="cite">[17]</a>, and
-          current leaderboards place several models above 94%. When the gap between candidate
-          models is smaller than the benchmark's own noise, the benchmark cannot rank them.
-          Selection should be driven by HealthBench, MedXpertQA and Med-HALT instead.
-        </p>
-      </div>
-
-      <p>
-        One more useful data point. Recent evaluation in <em>Nature Medicine</em> finds that
-        general-purpose frontier models outperform specialised clinical AI
-        tools<a href="#ref-18" class="cite">[18]</a>. For us that is good news, because it means
-        the leverage is in the system design, that is in retrieval, judging and knowing when to
-        decline, rather than in obtaining a specially trained medical model we could not train
-        anyway.
-      </p>
-
-      <h3>What goes where</h3>
-      <p>
-        A three-agent, four-judge pipeline makes roughly ten model calls per question, so using a
-        frontier model for all of them costs about ten times a single-call baseline. That is
-        unnecessary for most of the jobs. The table below uses one current model family as a worked
-        example, because its per-tier pricing is published, but the reasoning is not tied to any
-        vendor.
-      </p>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Job</th><th>Tier</th><th>Why</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Emergency check</strong></td>
-              <td><span class="pill t3">Cheapest</span></td>
-              <td>
-                This runs as a fixed list of warning signs first, with a small model as a second
-                pass to catch wordings the list misses. The guarantee comes from the rule list
-                being auditable and tuned to catch too much rather than too little, not from model
-                capability. A frontier model here would add cost and delay to a decision that needs
-                to be predictable and repeatable.
-              </td>
-            </tr>
-            <tr>
-              <td><strong>Query planner</strong></td>
-              <td><span class="pill t2">Mid</span></td>
-              <td>Breaking a question into search terms under a fixed format. Following instructions matters more than deep reasoning.</td>
-            </tr>
-            <tr>
-              <td><strong>Retrieval</strong></td>
-              <td>Not a chat model</td>
-              <td>An embedding model for finding candidates and a cross-encoder for ranking them.</td>
-            </tr>
-            <tr>
-              <td><strong>Specialist agents</strong></td>
-              <td><span class="pill t2">Mid</span></td>
-              <td>Because answers are constrained to retrieved evidence, a frontier model helps less here than its benchmark scores suggest. MIRAGE shows retrieval lifting mid-tier models to the level of stronger ones<a href="#ref-3" class="cite">[3]</a>.</td>
-            </tr>
-            <tr>
-              <td><strong>Judges</strong></td>
-              <td><span class="pill t1">Best</span></td>
-              <td>The one place we do not economise. Judges are the last check before the user sees anything, judge reliability is fragile<a href="#ref-12" class="cite">[12]</a>, and judge quality limits how much any claim can be trusted.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="callout is-key">
-        <span class="callout-label">The main point</span>
-        <p>
-          How capable a model needs to be does not track how bad it is when it fails. The job with
-          the worst failure, missing an emergency, gets the cheapest model, because its
-          reliability comes from the design rather than from the model. The job that most needs a
-          strong model is judging, which is the first place most systems try to save money.
-        </p>
-      </div>
-
-      <h3>Judges must not be the same model as the agents</h3>
-      <p>
-        Models prefer their own output<a href="#ref-5" class="cite">[5]</a>. That gives one hard
-        rule: no judge should be the same model family as an agent it is scoring. Where that is not
-        possible, judging has to be done blind, with agent identity stripped out and the order of
-        answers shuffled each time. We also score the four axes in separate calls, because scoring
-        them together lets a good evidence score bleed into the safety score, which is exactly the
-        link the panel exists to break.
-      </p>
-    </section>
-
-    <!-- ══════ 4 ══════ -->
-    <section id="s4">
-      <h2><span class="sec-num">4</span>How the system works</h2>
-
-      <p>
-        The pipeline has six steps, matching the architecture diagram on the project home page. Two
-        of them can stop the process early without producing any answer at all.
-      </p>
+      <h2><span class="sec-num">3</span>How the system works</h2>
+      <p>The system has six steps. Two of them can stop everything early, on purpose.</p>
 
       <figure>
         <div class="fig-frame">
@@ -653,7 +449,7 @@ td strong { color: var(--ink); font-weight: 600; }
             <rect class="bx bx-a" x="156" y="118" width="120" height="62"/>
             <text class="tl" x="166" y="138">Query Planner</text>
             <text class="ts" x="166" y="153">Emergency check,</text>
-            <text class="ts" x="166" y="165">then picks agents</text>
+            <text class="ts" x="166" y="165">no AI used here</text>
 
             <path class="edr" d="M216 118 L 216 74"/>
             <text class="lblr" x="222" y="98">emergency</text>
@@ -665,8 +461,8 @@ td strong { color: var(--ink); font-weight: 600; }
 
             <rect class="bx bx-g" x="306" y="118" width="122" height="62"/>
             <text class="tl" x="316" y="138">MediRAG-West</text>
-            <text class="ts" x="316" y="153">Guidelines, literature,</text>
-            <text class="ts" x="316" y="165">drug references</text>
+            <text class="ts" x="316" y="153">Keyword search,</text>
+            <text class="ts" x="316" y="165">no AI used here</text>
 
             <path class="edr" d="M367 180 L 367 224"/>
             <text class="lblr" x="373" y="204">no evidence</text>
@@ -691,7 +487,7 @@ td strong { color: var(--ink); font-weight: 600; }
             <text class="tl" x="626" y="114">SafeJudge</text>
             <text class="ts" x="626" y="129">Evidence · Safety</text>
             <text class="ts" x="626" y="142">Conflict · Confidence</text>
-            <text class="ts" x="626" y="157">Separate blind calls</text>
+            <text class="ts" x="626" y="157">4 separate AI calls</text>
 
             <line class="ed" x1="679" y1="166" x2="679" y2="210"/>
 
@@ -702,265 +498,217 @@ td strong { color: var(--ink); font-weight: 600; }
           </svg>
         </div>
         <figcaption>
-          <strong>Figure 1.</strong> The six steps, matching the architecture diagram on the home
-          page. Dashed red arrows are the two ways the pipeline can stop without producing an
-          answer, which is what makes declining a designed behaviour rather than an accident.
+          <strong>Figure 1.</strong> The six steps. Red dashed arrows are the two ways the system
+          stops without giving an answer. Only the Agent Debate and SafeJudge boxes actually call
+          an AI model, everything else is plain code.
         </figcaption>
       </figure>
 
-      <h3>1 and 2. Question and Query Planner</h3>
       <p>
-        Before anything else, the planner screens for presentations that need urgent care, such as
-        possible heart or breathing emergencies, stroke signs, severe allergic reactions,
-        uncontrolled bleeding, and risk of self-harm. This happens before any search and before any
-        model generates clinical text. If it triggers, the pipeline stops immediately with a
-        referral to urgent care. Nothing is retrieved and no agent runs, which also removes any
-        chance of the system discussing symptoms in a way that delays care.
+        <strong>1. Question.</strong> The user types a health question into a text box.
       </p>
       <p>
-        If it does not trigger, the planner turns the question into search terms and decides which
-        agents to activate. A question about dietary iron does not need every agent, and running
-        one anyway produces filler rather than insight.
+        <strong>2. Query Planner.</strong> Before anything else, plain code checks the question
+        against a list of emergency warning phrases (chest pain, stroke signs, severe bleeding,
+        thoughts of self-harm). If one matches, the system stops immediately and tells the user to
+        get real help. No AI is called at this step at all.
+      </p>
+      <p>
+        <strong>3. MediRAG-West.</strong> If it is not an emergency, plain code searches a small
+        library of about twenty real medical sources (NICE guidelines, WHO guidance, and similar)
+        by matching keywords in the question against keywords in each source. This is a simple
+        search, not a fancy AI search, and that is fine because it only has one job: find sources
+        that are actually relevant, or admit that none are. Each source is also labelled with how
+        strong its evidence is, high, moderate, or low certainty, based on the GRADE system doctors
+        already use for this<a href="#ref-5" class="cite">[5]</a>. If nothing scores high enough,
+        the system stops here and tells the user it found no good evidence, instead of letting an
+        AI guess from memory.
+      </p>
+      <p>
+        <strong>4. Agent Debate.</strong> If evidence was found, three AI agents (Western Medicine,
+        Nutrition, Lifestyle) each answer the same question from the same evidence, at the same
+        time, without seeing each other's answers first. Then a fourth AI call shows all three
+        answers to each other and asks: did anyone say something the evidence does not support, and
+        do any two of them actually disagree?
+      </p>
+      <p>
+        <strong>5. SafeJudge.</strong> Four more AI calls, one per judge, score the (now revised)
+        answers on evidence quality, safety, conflict, and whether the stated confidence matches the
+        evidence. Each judge only sees the answers with the agent's name hidden and the order
+        shuffled, so it cannot just favour whichever agent it saw first. If the Safety Judge finds a
+        real problem, it can block the whole answer. This is not a vote, a bad safety score
+        overrides everything else, it is not averaged away by the other three judges.
+      </p>
+      <p>
+        <strong>6. Final answer.</strong> One last AI call combines everything into a plain-language
+        answer, alongside a confidence score we calculate ourselves from the real evidence scores
+        and real judge scores, not asked from the AI.
+      </p>
+    </section>
+
+    <!-- ══════ 4 ══════ -->
+    <section id="s4">
+      <h2><span class="sec-num">4</span>The prompts we wrote</h2>
+      <p>
+        Every AI call in this system is given a system prompt, instructions that tell it what job
+        it has and what it is not allowed to do. Here is what we actually wrote, word for word,
+        for each one.
       </p>
 
-      <h3>3. MediRAG-West retrieval</h3>
-      <p>
-        Retrieval runs a keyword search and a meaning-based search at the same time, then combines
-        and re-ranks the results.
-      </p>
-      <ul>
-        <li><strong>Keyword search</strong> using BM25<a href="#ref-19" class="cite">[19]</a>. Essential in medicine, where exact drug names and guideline numbers have to match literally.</li>
-        <li><strong>Meaning-based search</strong> for everyday phrasing, where "chest feels tight when I climb stairs" shares almost no words with the clinical text it should match.</li>
-        <li><strong>Combining both</strong> with reciprocal rank fusion<a href="#ref-20" class="cite">[20]</a>, which merges by position rather than score and so sidesteps the fact that the two searches produce incompatible numbers.</li>
-        <li><strong>Re-ranking</strong> the top results with a cross-encoder, which is more accurate because it looks at the question and the document together.</li>
-        <li><strong>Ordering</strong> the surviving evidence with the strongest passages first and last, to work around the lost-in-the-middle effect<a href="#ref-7" class="cite">[7]</a>.</li>
-      </ul>
-      <p>
-        If nothing clears the relevance threshold, the pipeline stops and says so. This is the most
-        important check in the whole system. It is what stops the model answering from memory when
-        the search fails, which is exactly when unsupported claims appear.
-      </p>
-
-      <h3>4. Agent debate</h3>
-      <p>
-        The selected agents answer <strong>independently and at the same time</strong>, each given
-        the same evidence but a different brief. Independence matters, because agents that can see
-        each other's drafts converge too early, and that destroys the disagreement signal the whole
-        design exists to surface.
-      </p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Agent</th><th>Covers</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Western Medicine</strong></td><td>What the condition may be, red flags, when to seek care, medication cautions</td></tr>
-            <tr><td><strong>Nutrition</strong></td><td>Dietary factors with real mechanistic or trial support</td></tr>
-            <tr><td><strong>Lifestyle</strong></td><td>Sleep, activity, behaviour and stress</td></tr>
-          </tbody>
-        </table>
+      <h3>The three specialist agents</h3>
+      <p>Each agent gets the same base rules, plus one line that narrows its job:</p>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Western Medicine Agent</span>
+        <p>"You cover what the condition may be, red-flag symptoms, when to seek professional care, and medication cautions."</p>
+      </div>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Nutrition Agent</span>
+        <p>"You cover dietary factors that have real mechanistic or trial support for this question."</p>
+      </div>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Lifestyle Agent</span>
+        <p>"You cover sleep, activity, behaviour and stress factors relevant to this question."</p>
+      </div>
+      <p>All three also get this shared rule, so none of them accidentally acts like a doctor:</p>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Shared rule, appended to every agent</span>
+        <p>"Use only the supplied evidence. Do not use outside medical knowledge or invent sources. Do not diagnose, prescribe, name a dose, or tell the user to start, stop or change a medication. If the evidence is thin, say so plainly instead of sounding more certain than you are. Write two to four plain sentences a layperson can follow. No headings, no bullet points, no markdown."</p>
       </div>
       <p>
-        Each agent returns claims tagged with the evidence supporting them, a certainty label using
-        GRADE categories<a href="#ref-21" class="cite">[21]</a>, and an explicit list of what it
-        could not work out from the evidence given. Claims with no supporting evidence are dropped
-        automatically, rather than being discouraged in the prompt and quietly ignored.
-      </p>
-      <p>
-        The agents then see each other's claims once and may revise, concede, or hold their
-        position. We limit this to a <strong>single round</strong>, because more rounds mostly
-        produce agreement rather than correction, and agreement is the thing we are trying not to
-        manufacture. Whatever they still disagree about is carried through to the final answer
-        rather than smoothed away.
+        We also force every answer into a strict format, so our code never has to guess what the AI
+        meant: <code>{"text": "...", "confidence": 0.0, "strength": "Low|Moderate|High", "cited_evidence_ids": ["E1"], "gap": "..."}</code>.
+        The "gap" field asks the AI to say what it could not figure out, which turned out to be one
+        of the more useful fields, it stops the agent from pretending it covered something it did
+        not.
       </p>
 
-      <h3>5. SafeJudge</h3>
-      <p>
-        Four judges score the revised answers on separate axes, in separate calls, with agent
-        identity removed and answer order shuffled.
-      </p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Judge</th><th>Asks</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Evidence Judge</strong></td><td>Is every claim traceable to retrieved evidence, and are the citations accurate?</td></tr>
-            <tr><td><strong>Safety Judge</strong></td><td>Any contraindications, interactions, missed red flags, or advice that could delay care?</td></tr>
-            <tr><td><strong>Conflict Judge</strong></td><td>Do the agents really disagree, or is it just a difference in emphasis?</td></tr>
-            <tr><td><strong>Confidence Judge</strong></td><td>Is the certainty being expressed proportionate to the evidence behind it?</td></tr>
-          </tbody>
-        </table>
+      <h3>The debate step</h3>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Debate prompt</span>
+        <p>"Three specialist agents have each answered the same question from the same evidence. Read their answers and decide, for each agent, whether anything they said overstates the evidence, and whether any two agents materially disagree (not just differ in emphasis). ... Do not invent disagreements that are not really there."</p>
       </div>
-      <div class="callout is-warn">
-        <span class="callout-label">The Safety Judge blocks, it does not vote</span>
-        <p>
-          The Safety Judge does not contribute a score that gets averaged in. If it objects, the
-          answer is thrown out and replaced with a cautious safety response, no matter how well the
-          other three scored it. Averaging safety into a combined score would let a well-cited,
-          internally consistent, unsafe answer through, which is the exact failure this panel
-          exists to prevent.
-        </p>
+      <p>
+        That last sentence exists because early on we noticed the model wanted to find a
+        disagreement even when there was not a real one, presumably because "agents in conflict"
+        sounds like a more interesting answer than "they agree."
+      </p>
+
+      <h3>The four judges</h3>
+      <p>Each judge gets a one-line job description:</p>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Evidence Judge</span>
+        <p>"Check whether every claim traces back to the supplied evidence and whether the cited evidence ids actually support what is claimed."</p>
+      </div>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Safety Judge</span>
+        <p>"Check for contraindications, missed red flags, drug interaction risks, or advice that could delay proper care. ... If you find a real safety problem serious enough that this answer should not reach the user as written, set veto to true."</p>
+      </div>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Conflict Judge</span>
+        <p>"Check whether the agents materially disagree with each other, as opposed to just covering different ground."</p>
+      </div>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Confidence Judge</span>
+        <p>"Check whether the certainty in each answer is proportionate to the strength of the evidence behind it."</p>
+      </div>
+      <p>All four also get this line, to stop one good score from leaking into another:</p>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Shared rule, appended to every judge</span>
+        <p>"Score independently. Do not let a good score on one aspect inflate your score on this one."</p>
       </div>
 
-      <h3>6. Final answer</h3>
-      <p>
-        The last step combines the surviving claims, the judge scores and the remaining
-        disagreement into what the user sees: a plain-language summary, citations, a confidence
-        score, safety notes, and a statement of what the agents did not agree on. Claims the
-        Evidence Judge flagged as unsupported are excluded, and this step is not given the chance
-        to rescue them.
-      </p>
+      <h3>The final answer</h3>
+      <div class="prompt-box">
+        <span class="prompt-box-label">Consensus prompt</span>
+        <p>"Merge them into one coherent answer in plain language, four to six sentences, that a layperson can follow. Mention any real disagreement between agents rather than hiding it. Do not diagnose, prescribe, or name a dose."</p>
+      </div>
     </section>
 
     <!-- ══════ 5 ══════ -->
     <section id="s5">
-      <h2><span class="sec-num">5</span>Confidence and safety</h2>
+      <h2><span class="sec-num">5</span>Problems we ran into</h2>
+      <p>Building this surfaced real problems, not just design decisions on paper.</p>
 
-      <h3>What the confidence score means</h3>
+      <h3>AI answers are not always valid JSON</h3>
       <p>
-        The confidence figure has to reflect evidence quality, not just how much the models agreed.
-        Models trained on overlapping data agree for reasons that have nothing to do with being
-        right, so agreement on its own is a weak and potentially misleading signal. We combine
-        three things:
-      </p>
-      <ul>
-        <li><strong>Evidence coverage</strong>, how well the surviving claims are supported by retrieved sources, weighted by how relevant those sources were.</li>
-        <li><strong>Agreement</strong> between agents, counted only over claims that address the same point, so that agents answering different sub-questions are not scored as disagreeing.</li>
-        <li><strong>Judge scores</strong> from the evidence, conflict and confidence judges.</li>
-      </ul>
-      <p>
-        Evidence and judge scores each carry roughly twice the weight of agreement, deliberately.
-        Treating agreement between similar models as independent confirmation is the statistical
-        mistake that makes ensembles look more reliable than they are. On top of that, several
-        penalties reduce the result: sources that still need human review, claims resting on a
-        single source, and low-certainty evidence categories. These multiply rather than subtract,
-        so several separate weaknesses compound. The score is always shown next to what it is made
-        of, never on its own.
+        We ask every AI call to return JSON so our code can read it directly. In practice, models
+        sometimes wrap the JSON in a code block, or add a sentence before it. Our code now looks
+        for the first <code>{</code> and last <code>}</code> in the response and tries to parse just
+        that part, rather than assuming the whole response is clean JSON. Without this, a
+        perfectly good answer could fail to display just because of one stray sentence around it.
       </p>
 
-      <h3>Declining is a designed outcome</h3>
+      <h3>Our first search had a false-match bug</h3>
       <p>
-        Giving a model an explicit way to decline measurably improves how appropriately it
-        declines<a href="#ref-6" class="cite">[6]</a>. The system therefore has named end states,
-        each with its own response:
-      </p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>State</th><th>When</th><th>What the user gets</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Answer given</strong></td><td>Evidence found, nothing blocked</td><td>Full grounded response</td></tr>
-            <tr><td><strong>Safety stop</strong></td><td>Emergency signs, or the Safety Judge objects</td><td>Urgent care referral only</td></tr>
-            <tr><td><strong>Out of scope</strong></td><td>Not something this module covers</td><td>A decline, with a redirection</td></tr>
-            <tr><td><strong>Need more detail</strong></td><td>Question too vague to search against</td><td>Clarifying questions</td></tr>
-            <tr><td><strong>No evidence</strong></td><td>Nothing relevant enough was found</td><td><strong>Nothing.</strong> It says so and stops.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        The last state is what separates this from an ordinary assistant. When the search fails, the
-        system says so and stops. It does not fall back on what the model happens to remember,
-        because that fallback is indistinguishable, to the person reading it, from a properly
-        grounded answer.
+        Our keyword search originally checked whether a word from the question appeared anywhere
+        inside a source's text. This backfired: the word "how" (from "how do I bake bread") matched
+        because it is hiding inside the word "sh<strong>ow</strong>" in an unrelated sentence, and
+        the system returned medical evidence for a question about baking. We fixed it by matching
+        whole words only, not substrings. This is the kind of bug you only catch by actually testing
+        with odd questions, not by reading the code.
       </p>
 
-      <h3>Where this sits legally</h3>
+      <h3>Free AI providers have rate limits</h3>
       <p>
-        The system provides health <em>information</em>, not clinical decision support. It does not
-        take in patient medical records, does not produce patient-specific diagnoses or treatment
-        plans, and shows the basis for every statement so a reader can check it independently.
-        These properties line up with the criteria that separate regulated clinical decision
-        support software from software that is not a
-        device<a href="#ref-22" class="cite">[22]</a>, and that boundary is a design constraint
-        rather than a disclaimer added at the end.
+        Groq and Gemini's free tiers cap how many requests you can make per minute and per day. One
+        question uses about nine AI calls, so a shared free key supports roughly a hundred full
+        questions a day before someone gets a "please slow down" error. We made sure that error
+        shows up clearly to the user instead of the page silently breaking.
       </p>
-      <div class="callout is-limit">
-        <span class="callout-label">Hard limits</span>
-        <p>
-          No doses. No prescriptions. No personalised treatment plan. No instruction to start, stop
-          or change any medication. No diagnosis. These are enforced in the prompts, checked by the
-          Safety Judge, and cannot be overridden by asking.
-        </p>
-      </div>
+
+      <h3>We could not fully test with real API keys during development</h3>
+      <p>
+        We built and tested the whole pipeline by faking what Groq and Gemini would send back,
+        checking that our code handles success, errors, and badly formatted responses correctly,
+        before ever calling the real APIs. This caught the JSON and search bugs above before they
+        reached a real user.
+      </p>
+
+      <h3>A judge should not grade its own kind</h3>
+      <p>
+        This was less a bug and more a design worry: if the same AI company answered and judged,
+        would the judge unfairly favour writing that reads like its own style? We do not have proof
+        either way, since we have not run the direct comparison, but splitting agents and judges
+        across two different providers removes the question entirely rather than trying to correct
+        for it afterward.
+      </p>
     </section>
 
     <!-- ══════ 6 ══════ -->
     <section id="s6">
-      <h2><span class="sec-num">6</span>How we would test it</h2>
-      <p>
-        Accuracy alone is the wrong target. A system that answers everything at 85% accuracy is
-        worse, here, than one that answers 70% of questions at 92% and declines the rest. So the
-        test plan measures grounding, calibration and declining alongside correctness.
-      </p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>What</th><th>Measured how</th></tr></thead>
-          <tbody>
-            <tr><td>Retrieval quality</td><td>Recall and ranking quality against annotated question and passage pairs</td></tr>
-            <tr><td>Grounding</td><td>Manual audit of whether each claim traces to real evidence, plus how well the Evidence Judge agrees with human raters</td></tr>
-            <tr><td>Made-up content</td><td>Rate of unsupported assertions, using Med-HALT style probes<a href="#ref-1" class="cite">[1]</a></td></tr>
-            <tr><td>Answer quality</td><td>Physician-written rubrics in the style of HealthBench<a href="#ref-13" class="cite">[13]</a></td></tr>
-            <tr><td>Safety</td><td>How many real emergencies are caught, and how many false alarms that costs</td></tr>
-            <tr><td>Calibration</td><td>Whether a stated 80% confidence is right about 80% of the time</td></tr>
-            <tr><td>Declining</td><td>How often it correctly declines, and how often it declines when it should not</td></tr>
-            <tr><td>Judge reliability</td><td>Agreement with humans corrected for chance, and how much scores shift when answer order is swapped<a href="#ref-12" class="cite">[12]</a></td></tr>
-          </tbody>
-        </table>
+      <h2><span class="sec-num">6</span>Limitations</h2>
+      <div class="callout is-limit">
+        <span class="callout-label">Stated plainly</span>
+        <p>
+          This is a working prototype, not a tested medical product, and nothing here should be
+          read as proof that the system gives correct medical answers.
+        </p>
       </div>
-      <p>
-        The design also makes claims that can be proved wrong, and each should be tested by
-        removing the part in question: no retrieval, a single agent instead of three, no debate
-        round, no judges, no evidence check, and one frontier model used for everything.
-      </p>
-      <p>
-        The most important single experiment is <strong>letting a judge share a model family with
-        the agents it scores</strong>. If the scores do not move, our most restrictive design rule
-        is unnecessary and should be dropped. If they do move, it is justified.
-      </p>
+      <ul>
+        <li><strong>No clinical testing.</strong> No doctor has reviewed the outputs at scale. It should never be used for a real health decision.</li>
+        <li><strong>Small evidence library.</strong> About twenty sources is tiny compared to real medical literature, so many real questions will get a "not enough evidence" response.</li>
+        <li><strong>Simple search.</strong> Keyword matching is easy to build and explain, but it will miss questions phrased very differently from our source text. A smarter, meaning-based search would catch more of these.</li>
+        <li><strong>Judges are AI too.</strong> Using AI to check AI cannot fully remove bias, it can only reduce it. A human should still review this before anyone trusts it.</li>
+        <li><strong>The confidence number is our own formula</strong>, not something proven against real outcomes. Treat it as a rough guide, not a statistic.</li>
+        <li><strong>Free tier limits.</strong> This will not hold up under heavy public traffic without a paid plan.</li>
+      </ul>
     </section>
 
     <!-- ══════ 7 ══════ -->
     <section id="s7">
-      <h2><span class="sec-num">7</span>Limitations</h2>
-      <div class="callout is-limit">
-        <span class="callout-label">Stated plainly</span>
-        <p>
-          This is a design with a working demonstration interface. The measurements in Section 6
-          are a plan, not results. Nothing here should be read as evidence that the system performs
-          as intended.
-        </p>
-      </div>
-      <ul>
-        <li><strong>No clinical validation.</strong> Nothing has been tested against clinical outcomes, and none of it is suitable for care decisions.</li>
-        <li><strong>Small library.</strong> The demonstration corpus is tiny next to the medical literature. Gaps show up as the system declining, which is the safe failure, but declining on answerable questions is still a real cost to the user.</li>
-        <li><strong>Judges are models too.</strong> Using language models to check language models has a circularity problem that cannot be fully removed. Keeping judges in a different model family and scoring blind reduces it. Human evaluation is still needed.</li>
-        <li><strong>The confidence weights are guesses.</strong> They are sensible starting values, not values fitted to real calibration data, and should be tuned before any confidence figure is treated as meaningful.</li>
-        <li><strong>Cost.</strong> Roughly ten model calls per question. Whether that beats a well-tuned single agent on accuracy is contested<a href="#ref-11" class="cite">[11]</a>, and our justification rests on visibility, which the tests above still have to confirm.</li>
-        <li><strong>Benchmarks are proxies.</strong> Doing well on a benchmark does not guarantee doing well in deployment, and contamination is hard to rule out.</li>
-        <li><strong>One language, one jurisdiction.</strong> The guidance is mostly UK and US, so how well it applies elsewhere is not established.</li>
-      </ul>
-    </section>
-
-    <!-- ══════ 8 ══════ -->
-    <section id="s8">
-      <h2><span class="sec-num">8</span>Conclusion</h2>
+      <h2><span class="sec-num">7</span>Conclusion</h2>
       <p>
-        This report described MediRAG-West and argued for a particular way of building it.
+        We built a small, working, free system where three AI agents answer a health question
+        independently, a fourth AI call compares their answers, four more AI calls judge them on
+        different criteria, and only then is one answer shown, with its evidence and confidence
+        attached. Two design choices mattered most: splitting agents and judges across different AI
+        providers so a judge never grades its own kind, and making the system stop and say "I don't
+        know" when it has no good evidence, instead of guessing.
       </p>
       <p>
-        The first argument is that <strong>model choice should be made job by job</strong>, and
-        that how capable a model needs to be does not track how bad it is when it fails. The most
-        safety-critical job here, catching emergencies, gets the cheapest model, because its
-        reliability comes from an auditable list of warning signs rather than from model
-        capability. The job that most needs a strong model is judging, which is where most systems
-        cut costs first. Meanwhile MedQA, still the most cited medical benchmark, has become too
-        easy to separate frontier models, and selection should move to HealthBench, MedXpertQA and
-        hallucination-specific tests.
-      </p>
-      <p>
-        The second argument is that <strong>declining has to be designed in</strong>. Two of the six
-        steps can stop the pipeline without producing an answer, and the evidence check in
-        particular is what stops the system quietly substituting model memory when the search
-        fails. A system that cannot decline cannot be trusted when it does not decline.
-      </p>
-      <p>
-        Both claims can be tested, and Section 6 says how.
+        Building it surfaced real, ordinary engineering problems, messy JSON, a search bug, rate
+        limits, more than any deep theoretical one. That is probably the most honest thing this
+        report can say.
       </p>
     </section>
 
@@ -968,35 +716,18 @@ td strong { color: var(--ink); font-weight: 600; }
     <section id="refs" class="refs">
       <h2>References</h2>
       <ol>
-        <li id="ref-1"><span class="ref-title">Med-HALT: Medical Domain Hallucination Test for Large Language Models.</span> Pal, A., Umapathi, L. K., &amp; Sankarasubbu, M. <span class="ref-venue">Proceedings of CoNLL 2023.</span> arXiv:2307.15343.</li>
-        <li id="ref-2"><span class="ref-title">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</span> Lewis, P., Perez, E., Piktus, A., et al. <span class="ref-venue">NeurIPS 33,</span> 2020. arXiv:2005.11401.</li>
-        <li id="ref-3"><span class="ref-title">Benchmarking Retrieval-Augmented Generation for Medicine.</span> Xiong, G., Jin, Q., Lu, Z., &amp; Zhang, A. <span class="ref-venue">Findings of ACL 2024,</span> pp. 6233–6251. arXiv:2402.13178.</li>
-        <li id="ref-4"><span class="ref-title">Improving Factuality and Reasoning in Language Models through Multiagent Debate.</span> Du, Y., Li, S., Torralba, A., Tenenbaum, J. B., &amp; Mordatch, I. <span class="ref-venue">ICML 2024.</span> arXiv:2305.14325.</li>
-        <li id="ref-5"><span class="ref-title">Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.</span> Zheng, L., Chiang, W.-L., Sheng, Y., et al. <span class="ref-venue">NeurIPS 2023 Datasets and Benchmarks Track.</span> arXiv:2306.05685.</li>
-        <li id="ref-6"><span class="ref-title">Knowing When to Abstain: Medical LLMs Under Clinical Uncertainty.</span> <span class="ref-venue">Proceedings of EACL 2026.</span> arXiv:2601.12471.</li>
-        <li id="ref-7"><span class="ref-title">Lost in the Middle: How Language Models Use Long Contexts.</span> Liu, N. F., Lin, K., Hewitt, J., et al. <span class="ref-venue">TACL,</span> 2024. arXiv:2307.03172.</li>
-        <li id="ref-8"><span class="ref-title">Almanac: Retrieval-Augmented Language Models for Clinical Medicine.</span> Zakka, C., Shad, R., Chaurasia, A., et al. <span class="ref-venue">NEJM AI 1(2),</span> 2024. doi:10.1056/AIoa2300068.</li>
-        <li id="ref-9"><span class="ref-title">MedAgents: Large Language Models as Collaborators for Zero-shot Medical Reasoning.</span> Tang, X., Zou, A., Zhang, Z., et al. <span class="ref-venue">Findings of ACL 2024.</span> arXiv:2311.10537.</li>
-        <li id="ref-10"><span class="ref-title">MDAgents: An Adaptive Collaboration of LLMs for Medical Decision-Making.</span> Kim, Y., Park, C., Jeong, H., et al. <span class="ref-venue">NeurIPS 2024.</span> arXiv:2404.15155.</li>
-        <li id="ref-11"><span class="ref-title">Rethinking the Value of Multi-Agent Workflow: A Strong Single Agent Baseline.</span> <span class="ref-venue">arXiv preprint,</span> 2026. arXiv:2601.12307.</li>
-        <li id="ref-12"><span class="ref-title">Reliability without Validity: A Systematic, Large-Scale Evaluation of LLM-as-a-Judge Models.</span> <span class="ref-venue">arXiv preprint,</span> 2026. arXiv:2606.19544.</li>
-        <li id="ref-13"><span class="ref-title">HealthBench: Evaluating Large Language Models Towards Improved Human Health.</span> Arora, R. K., Wei, J., Soskin Hicks, R., et al. <span class="ref-venue">OpenAI,</span> 2025. arXiv:2505.08775.</li>
-        <li id="ref-14"><span class="ref-title">What Disease Does This Patient Have? A Large-Scale Open Domain Question Answering Dataset from Medical Exams.</span> Jin, D., Pan, E., Oufattole, N., et al. <span class="ref-venue">Applied Sciences 11(14),</span> 2021. arXiv:2009.13081.</li>
-        <li id="ref-15"><span class="ref-title">MedXpertQA: Benchmarking Expert-Level Medical Reasoning and Understanding.</span> Zuo, Y., Qu, S., Li, Y., et al. <span class="ref-venue">ICML 2025.</span> arXiv:2501.18362.</li>
-        <li id="ref-16"><span class="ref-title">Toward Expert-Level Medical Question Answering with Large Language Models.</span> Singhal, K., Tu, T., Gottweis, J., et al. <span class="ref-venue">Nature Medicine,</span> 2025. arXiv:2305.09617.</li>
-        <li id="ref-17"><span class="ref-title">Can Generalist Foundation Models Outcompete Special-Purpose Tuning? A Case Study in Medicine.</span> Nori, H., Lee, Y. T., Zhang, S., et al. <span class="ref-venue">arXiv preprint,</span> 2023. arXiv:2311.16452.</li>
-        <li id="ref-18"><span class="ref-title">General-purpose large language models outperform specialized clinical AI tools on medical benchmarks.</span> <span class="ref-venue">Nature Medicine,</span> 2026. doi:10.1038/s41591-026-04431-5.</li>
-        <li id="ref-19"><span class="ref-title">The Probabilistic Relevance Framework: BM25 and Beyond.</span> Robertson, S., &amp; Zaragoza, H. <span class="ref-venue">Foundations and Trends in Information Retrieval 3(4),</span> 2009, pp. 333–389.</li>
-        <li id="ref-20"><span class="ref-title">Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods.</span> Cormack, G. V., Clarke, C. L. A., &amp; Buettcher, S. <span class="ref-venue">SIGIR 2009,</span> pp. 758–759.</li>
-        <li id="ref-21"><span class="ref-title">GRADE Guidelines: 3. Rating the Quality of Evidence.</span> Balshem, H., Helfand, M., Schünemann, H. J., et al. <span class="ref-venue">Journal of Clinical Epidemiology 64(4),</span> 2011, pp. 401–406.</li>
-        <li id="ref-22"><span class="ref-title">Clinical Decision Support Software: Guidance for Industry and FDA Staff.</span> U.S. Food and Drug Administration, September 2022.</li>
+        <li id="ref-1"><span class="ref-title">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</span> Lewis, P., Perez, E., Piktus, A., et al. <span class="ref-venue">NeurIPS 33,</span> 2020. arXiv:2005.11401.</li>
+        <li id="ref-2"><span class="ref-title">Improving Factuality and Reasoning in Language Models through Multiagent Debate.</span> Du, Y., Li, S., Torralba, A., Tenenbaum, J. B., &amp; Mordatch, I. <span class="ref-venue">ICML 2024.</span> arXiv:2305.14325.</li>
+        <li id="ref-3"><span class="ref-title">Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.</span> Zheng, L., Chiang, W.-L., Sheng, Y., et al. <span class="ref-venue">NeurIPS 2023 Datasets and Benchmarks Track.</span> arXiv:2306.05685.</li>
+        <li id="ref-4"><span class="ref-title">Med-HALT: Medical Domain Hallucination Test for Large Language Models.</span> Pal, A., Umapathi, L. K., &amp; Sankarasubbu, M. <span class="ref-venue">Proceedings of CoNLL 2023.</span> arXiv:2307.15343.</li>
+        <li id="ref-5"><span class="ref-title">GRADE Guidelines: 3. Rating the Quality of Evidence.</span> Balshem, H., Helfand, M., Schünemann, H. J., et al. <span class="ref-venue">Journal of Clinical Epidemiology 64(4),</span> 2011, pp. 401–406.</li>
+        <li id="ref-6"><span class="ref-title">Clinical Decision Support Software: Guidance for Industry and FDA Staff.</span> U.S. Food and Drug Administration, September 2022.</li>
       </ol>
     </section>
 
     <footer class="paper-foot">
       <p><strong>Author.</strong> Yoonjae Lee, BSc (Hons) Computer Science with Artificial Intelligence, University of Nottingham Malaysia. Research internship supervised by Dr Simon Lau Boung Yew.</p>
-      <p><strong>Status.</strong> Research report describing a prototype. Not peer reviewed. Not a medical device, and not a source of medical advice.</p>
-      <p><strong>Sources.</strong> Benchmark figures are quoted from the cited publications. Model pricing changes often and should be re-checked before being used for budgeting.</p>
+      <p><strong>Status.</strong> Research report describing a working prototype. Not peer reviewed. Not a medical device, and not a source of medical advice.</p>
     </footer>
 
   </article>
