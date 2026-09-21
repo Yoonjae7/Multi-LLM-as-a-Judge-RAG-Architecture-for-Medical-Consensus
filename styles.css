@@ -3341,3 +3341,200 @@ body {
   background: linear-gradient(to bottom, rgba(3, 7, 18, 0.85), rgba(3, 7, 18, 0));
   pointer-events: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   INFERENCE OBSERVATORY · resilient demo and richer system motion
+   ═══════════════════════════════════════════════════════════════ */
+.west-live-badge {
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+.west-live-badge[data-mode="demo"] {
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(255, 251, 235, 0.92);
+}
+.west-live-badge[data-mode="demo"] > span[aria-hidden="true"] {
+  background: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.13);
+}
+
+.west-runtime {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(rgba(148, 163, 184, 0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.026) 1px, transparent 1px),
+    radial-gradient(circle at 18% 0%, rgba(14, 165, 233, 0.13), transparent 34%),
+    radial-gradient(circle at 82% 100%, rgba(124, 58, 237, 0.1), transparent 32%),
+    linear-gradient(158deg, #08111f 0%, #111d32 100%);
+  background-size: 32px 32px, 32px 32px, auto, auto, auto;
+  box-shadow:
+    0 30px 70px -34px rgba(2, 8, 23, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+.west-runtime::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto auto 12%;
+  width: 76%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.8), rgba(167, 139, 250, 0.55), transparent);
+  box-shadow: 0 0 22px rgba(56, 189, 248, 0.35);
+}
+.west-runtime.is-demo-fallback::before {
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.85), transparent);
+  box-shadow: 0 0 22px rgba(251, 191, 36, 0.28);
+}
+
+.west-demo-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(251, 191, 36, 0.26);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.22), rgba(251, 191, 36, 0.055));
+  animation: westNoticeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.west-demo-notice[hidden] { display: none; }
+.west-demo-notice-mark {
+  display: grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 auto;
+  border-radius: 0.5rem;
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.18);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.west-demo-notice strong,
+.west-demo-notice span { display: block; }
+.west-demo-notice strong { color: #fde68a; font-size: 0.78rem; }
+.west-demo-notice div > span { margin-top: 0.2rem; color: #cbd5e1; font-size: 0.74rem; line-height: 1.5; }
+@keyframes westNoticeIn {
+  from { opacity: 0; transform: translateY(-7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.west-runtime-state[data-state="demo"] {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.west-rail-step[data-status="active"]::before {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.25), #38bdf8, rgba(56, 189, 248, 0.25));
+  background-size: 180% 100%;
+  animation: westRailFlow 1.4s linear infinite;
+}
+@keyframes westRailFlow { to { background-position: -180% 0; } }
+
+.west-net-frame {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.018),
+    inset 0 -40px 90px rgba(2, 8, 23, 0.28),
+    0 18px 45px -30px rgba(56, 189, 248, 0.5);
+}
+.west-net-frame::after {
+  content: "LIVE INFERENCE MAP";
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+  padding: 0.22rem 0.45rem;
+  border: 1px solid rgba(125, 211, 252, 0.13);
+  border-radius: 5px;
+  color: rgba(186, 230, 253, 0.48);
+  background: rgba(2, 8, 23, 0.42);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.09em;
+  pointer-events: none;
+}
+
+.west-net-caption {
+  position: relative;
+  overflow: hidden;
+}
+.west-net-caption::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: linear-gradient(#38bdf8, #a78bfa);
+}
+
+.west-dispatch-row {
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+.west-dispatch-row[data-status="running"] {
+  box-shadow: inset 0 0 24px color-mix(in srgb, var(--agent-color) 7%, transparent);
+}
+.west-dispatch-track {
+  display: block;
+  height: 2px;
+  margin-top: 0.55rem;
+}
+.west-dispatch-fill {
+  position: relative;
+  box-shadow: 0 0 9px color-mix(in srgb, var(--agent-color) 55%, transparent);
+}
+.west-dispatch-row[data-status="running"] .west-dispatch-fill {
+  width: 68%;
+  animation: westAgentWork 1.25s ease-in-out infinite alternate;
+}
+@keyframes westAgentWork {
+  from { width: 24%; opacity: 0.55; }
+  to { width: 82%; opacity: 1; }
+}
+
+.west-response-mode {
+  padding: 0.23rem 0.52rem;
+  border: 1px solid rgba(217, 119, 6, 0.24);
+  border-radius: 999px;
+  color: #92400e;
+  background: #fffbeb;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.west-response-mode[hidden] { display: none; }
+
+.west-results > * {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.west-results.is-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.west-results.is-visible > *:nth-child(2) { transition-delay: 80ms; }
+.west-results.is-visible > *:nth-child(3) { transition-delay: 150ms; }
+.west-results.is-visible > *:nth-child(4) { transition-delay: 220ms; }
+.west-results.is-visible > *:nth-child(5) { transition-delay: 290ms; }
+
+@media (max-width: 640px) {
+  .west-demo-notice { padding: 0.72rem 0.75rem; }
+  .west-net-frame::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .west-demo-notice,
+  .west-rail-step[data-status="active"]::before,
+  .west-dispatch-row[data-status="running"] .west-dispatch-fill {
+    animation: none;
+  }
+  .west-results > *,
+  .west-results.is-visible > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

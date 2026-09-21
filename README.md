@@ -43,7 +43,7 @@ Requirements:
 
 - Node.js 18 or newer
 - Vercel CLI
-- Groq and Gemini API keys
+- Groq and Gemini API keys for live model responses
 
 Copy the environment template and add your keys:
 
@@ -58,7 +58,7 @@ npm install -g vercel
 vercel dev
 ```
 
-Open the local URL printed by Vercel. The frontend and `/api` functions must be served together for the full pipeline to work.
+Open the local URL printed by Vercel. When the `/api` functions and provider keys are available, the demo uses live model responses. If a provider or API route fails, the interface automatically completes the same six-stage flow with clearly labelled, deterministic fallback outputs derived only from the retrieved local evidence.
 
 ## Environment variables
 
@@ -68,6 +68,10 @@ GEMINI_API_KEY=
 ```
 
 Never commit real API keys. See [DEPLOY.md](DEPLOY.md) for deployment instructions.
+
+## Resilient demo mode
+
+The demo remains usable during missing-key errors, provider outages, rate limits, and local static previews. Successful live stages are preserved; only failed stages use deterministic fallback data. The runtime notice, activity log, final answer badge, and amber status styling clearly identify when fallback mode was used.
 
 ## Validation
 

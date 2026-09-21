@@ -59,7 +59,8 @@ pipeline early). At roughly 1,000 requests/day on each provider's free
 tier, that's a little over 100 full demo runs a day, shared across every
 visitor since it's one API key. Comfortable for a supervisor demo or a
 class, not built for public high-traffic use. If a provider rate-limits
-you, the UI surfaces the real error message rather than failing silently.
+or an API route is unavailable, the UI clearly switches the affected stages
+to deterministic demo fallback and finishes the evidence-grounded walkthrough.
 
 ## Files involved
 

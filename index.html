@@ -283,7 +283,7 @@
               <h2 id="west-consultation-title">Evidence-Based Western Medicine</h2>
               <p>Ask a health question and watch it move through the system: the Query Planner, evidence retrieval, three specialist agents, and the four SafeJudge checks, before a single answer is produced.</p>
             </div>
-            <span class="west-live-badge"><span aria-hidden="true"></span><span class="west-live-label">Live AI Backend</span></span>
+            <span class="west-live-badge" id="west-live-badge"><span aria-hidden="true"></span><span class="west-live-label">Live AI · Demo fallback ready</span></span>
           </div>
 
           <form id="west-consult-form" novalidate>
@@ -335,6 +335,14 @@
                 <span class="west-state-dot" aria-hidden="true"></span>
                 <span id="west-runtime-state-label">Running</span>
               </div>
+            </div>
+          </div>
+
+          <div id="west-demo-notice" class="west-demo-notice" role="status" hidden>
+            <span class="west-demo-notice-mark" aria-hidden="true">D</span>
+            <div>
+              <strong>Demo fallback active</strong>
+              <span>Live AI is unavailable, so the same pipeline is continuing with deterministic outputs grounded in the retrieved local evidence.</span>
             </div>
           </div>
 
@@ -390,6 +398,7 @@
               <div class="west-consensus-meta">
                 <span class="west-consensus-kicker">Integrated Response</span>
                 <span id="west-evidence-count" class="west-evidence-count-badge">Sources pending</span>
+                <span id="west-response-mode" class="west-response-mode" hidden>Demo fallback</span>
               </div>
               <div class="west-conf-display" aria-label="Confidence score">
                 <strong id="west-conf-score">0%</strong>

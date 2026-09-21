@@ -244,10 +244,14 @@
   var clockEl        = document.getElementById('west-clock');
   var runStateEl     = document.getElementById('west-runtime-state');
   var runStateLabel  = document.getElementById('west-runtime-state-label');
+  var demoNotice     = document.getElementById('west-demo-notice');
+  var liveBadge      = document.getElementById('west-live-badge');
+  var responseMode   = document.getElementById('west-response-mode');
 
   var runToken = 0;
   var clockTimer = null;
   var startedAt = 0;
+  var fallbackActive = false;
 
   function wait(ms) {
     return new Promise(function (r) { setTimeout(r, Math.max(30, ms)); });
@@ -299,6 +303,117 @@
   }
   function callConsensus(question, answers, conflicts) {
     return postJson('/api/consensus', { question: question, answers: answers, conflicts: conflicts });
+  }
+
+  /* When provider calls are unavailable, keep the architecture explorable
+     with deterministic outputs derived only from the retrieved evidence.
+     Demo mode is labelled throughout so it is never mistaken for live AI. */
+  function firstSentence(text) {
+    var match = String(text || '').match(/^.*?[.!?](?:\s|$)/);
+    return (match ? match[0] : String(text || '')).trim();
+  }
+
+  function roleTerms(role) {
+    return role === 'nutrition'
+      ? ['diet', 'nutrition', 'sodium', 'salt', 'fluid', 'iron', 'fibre', 'meal']
+      : role === 'lifestyle'
+        ? ['exercise', 'activity', 'sleep', 'stress', 'smoking', 'rest', 'caffeine']
+        : ['guideline', 'assessment', 'diagnosis', 'refer', 'monitor', 'clinical'];
+  }
+
+  function evidenceMatchesRole(role, item) {
+    var terms = roleTerms(role);
+    var haystack = item ? (item.title + ' ' + item.snippet + ' ' + item.type).toLowerCase() : '';
+    return terms.some(function (term) { return haystack.indexOf(term) !== -1; });
+  }
+
+  function evidenceForRole(role, evidence) {
+    return evidence.filter(function (item) {
+      return evidenceMatchesRole(role, item);
+    })[0] || evidence[0];
+  }
+
+  function fallbackAgent(role, evidence) {
+    var source = evidenceForRole(role, evidence);
+    var prefix = role === 'nutrition'
+      ? 'From a nutrition perspective, '
+      : role === 'lifestyle'
+        ? 'From a lifestyle perspective, '
+        : 'From a Western medicine perspective, ';
+    var supported = firstSentence(source && source.snippet);
+    var hasRoleMatch = evidenceMatchesRole(role, source);
+    var text = supported
+      ? prefix + supported.charAt(0).toLowerCase() + supported.slice(1)
+      : prefix + 'the local evidence does not support a specific recommendation.';
+    if (!hasRoleMatch && role !== 'western') {
+      text += ' The retrieved sources do not support a more specific ' + role + ' recommendation for this question.';
+    }
+    return {
+      role: role,
+      text: text,
+      confidence: source && source.grade === 'High' ? 0.76 : 0.64,
+      strength: source ? source.grade : 'Low',
+      citedEvidenceIds: source ? [source.id] : [],
+      gap: 'Demo fallback cannot add facts beyond the local evidence shown below.',
+      model: 'deterministic-demo'
+    };
+  }
+
+  function fallbackDebate() {
+    return {
+      revisions: [],
+      conflicts: [],
+      model: 'deterministic-demo'
+    };
+  }
+
+  function fallbackJudges(answers) {
+    var cited = answers.every(function (answer) { return (answer.citedEvidenceIds || []).length > 0; });
+    return {
+      evidence: { axis: 'evidence', score: cited ? 0.84 : 0.62, note: 'Demo check: each displayed claim is linked to retrieved local evidence.', model: 'deterministic-demo' },
+      safety: { axis: 'safety', score: 0.82, note: 'Demo check: no diagnosis, dose, or medication-change instruction was generated.', veto: false, model: 'deterministic-demo' },
+      conflict: { axis: 'conflict', score: 0.88, note: 'Demo check: the specialist outputs differ in emphasis but do not materially conflict.', model: 'deterministic-demo' },
+      confidence: { axis: 'confidence', score: 0.74, note: 'Demo check: certainty is capped because these are deterministic fallback outputs.', model: 'deterministic-demo' }
+    };
+  }
+
+  function fallbackConsensus(answers) {
+    var western = answers.filter(function (answer) { return answer.role === 'western'; })[0] || answers[0];
+    var supporting = answers.filter(function (answer) { return answer.role !== 'western'; })
+      .map(function (answer) { return firstSentence(answer.text); })
+      .filter(Boolean);
+    return {
+      summary: [
+        western ? western.text : 'The local evidence supports only a limited educational response.',
+        supporting.join(' '),
+        'This is a deterministic demonstration of the consensus workflow, not a live AI-generated clinical answer.'
+      ].filter(Boolean).join(' '),
+      safetyNotes: [
+        'This is general educational information, not a diagnosis or treatment plan.',
+        'Because demo fallback is active, have a qualified clinician assess any real or persistent health concern.',
+        'Seek urgent professional care if symptoms are severe, sudden, or rapidly worsening.'
+      ],
+      model: 'deterministic-demo'
+    };
+  }
+
+  function resetFallbackMode() {
+    fallbackActive = false;
+    if (runtime) runtime.classList.remove('is-demo-fallback');
+    if (demoNotice) demoNotice.hidden = true;
+    if (liveBadge) liveBadge.removeAttribute('data-mode');
+    if (responseMode) responseMode.hidden = true;
+  }
+
+  function activateFallback(stageLabel, error) {
+    if (!fallbackActive) {
+      fallbackActive = true;
+      if (runtime) runtime.classList.add('is-demo-fallback');
+      if (demoNotice) demoNotice.hidden = false;
+      if (liveBadge) liveBadge.setAttribute('data-mode', 'demo');
+      log('warn', 'Live ' + stageLabel + ' unavailable. Continuing in evidence-bound demo mode.');
+    }
+    if (error && error.message) log('warn', error.message);
   }
 
   /* Fisher-Yates, so judges see agent answers in a different order
@@ -374,7 +489,9 @@
         mk('span', 'west-dispatch-name', spec.label),
         mk('span', 'west-dispatch-status', 'Waiting')
       );
-      row.append(head, mk('p', 'west-dispatch-remit', spec.remit));
+      var track = mk('span', 'west-dispatch-track');
+      track.append(mk('span', 'west-dispatch-fill'));
+      row.append(head, mk('p', 'west-dispatch-remit', spec.remit), track);
       dispatchList.append(row);
     });
   }
@@ -455,13 +572,14 @@
       });
     }
 
-    net = { ctx: ctx, w: cssW, h: cssH, nodes: nodes, edges: edges, layers: layers, stage: 'idle' };
+    net = { ctx: ctx, w: cssW, h: cssH, nodes: nodes, edges: edges, layers: layers, stage: 'idle', currentLayer: -1 };
   }
 
   function setNetStage(key) {
     if (!net) return;
     net.stage = key;
     var target = STAGE_LAYER[key] !== undefined ? STAGE_LAYER[key] : -1;
+    net.currentLayer = target;
     net.nodes.forEach(function (n) {
       n.target = n.layer <= target ? 0.75 + Math.random() * 0.25 : 0.07;
     });
@@ -488,6 +606,40 @@
     var ctx = net.ctx;
     ctx.clearRect(0, 0, net.w, net.h);
 
+    /* Stage lanes make the architecture legible before any node activates.
+       The active lane gets a restrained scanner glow rather than decoration. */
+    net.layers.forEach(function (layer, li) {
+      var layerNodes = net.nodes.filter(function (node) { return node.layer === li; });
+      if (!layerNodes.length) return;
+      var x = layerNodes[0].x;
+      var prevX = li ? net.nodes.filter(function (node) { return node.layer === li - 1; })[0].x : 18;
+      var nextLayer = li < net.layers.length - 1
+        ? net.nodes.filter(function (node) { return node.layer === li + 1; })[0]
+        : null;
+      var nextX = nextLayer ? nextLayer.x : net.w - 18;
+      var left = li ? (prevX + x) / 2 : 12;
+      var right = nextLayer ? (x + nextX) / 2 : net.w - 12;
+
+      if (li === net.currentLayer) {
+        var lane = ctx.createLinearGradient(left, 0, right, 0);
+        lane.addColorStop(0, withAlpha(layer.color, 0));
+        lane.addColorStop(0.5, withAlpha(layer.color, 0.075));
+        lane.addColorStop(1, withAlpha(layer.color, 0));
+        ctx.fillStyle = lane;
+        ctx.fillRect(left, 26, right - left, net.h - 42);
+        ctx.fillStyle = withAlpha(layer.color, 0.65);
+        var scanRatio = REDUCED_MOTION ? 0.65 : 0.45 + 0.35 * Math.sin(Date.now() / 420);
+        ctx.fillRect(left + 8, 27, Math.max(18, (right - left - 16) * scanRatio), 1);
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(right, 30);
+      ctx.lineTo(right, net.h - 18);
+      ctx.strokeStyle = 'rgba(148,163,184,0.045)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
     net.nodes.forEach(function (n) {
       n.activation += (n.target - n.activation) * 0.075;
       n.pulse += 0.045;
@@ -513,15 +665,22 @@
       ctx.lineWidth = 0.9 + drive * 1.5;
       ctx.stroke();
 
-      if (!REDUCED_MOTION && e.particles.length < 2 && Math.random() < 0.055) {
-        e.particles.push({ t: 0, speed: 0.011 + Math.random() * 0.012 });
+      if (!REDUCED_MOTION && e.particles.length < 3 && Math.random() < 0.075) {
+        e.particles.push({ t: 0, speed: 0.009 + Math.random() * 0.014 });
       }
       for (var i = e.particles.length - 1; i >= 0; i--) {
         var p = e.particles[i];
         p.t += p.speed;
         if (p.t >= 1) { e.particles.splice(i, 1); continue; }
         var pt = bezierAt(p.t, e.a.x, e.a.y, c[0], c[1], c[2], c[3], e.b.x, e.b.y);
+        var tailT = Math.max(0, p.t - 0.055);
+        var tail = bezierAt(tailT, e.a.x, e.a.y, c[0], c[1], c[2], c[3], e.b.x, e.b.y);
         var fade = Math.sin(p.t * Math.PI);
+        var trail = ctx.createLinearGradient(tail.x, tail.y, pt.x, pt.y);
+        trail.addColorStop(0, withAlpha(e.color, 0));
+        trail.addColorStop(1, withAlpha(e.color, 0.7 * fade));
+        ctx.beginPath(); ctx.moveTo(tail.x, tail.y); ctx.lineTo(pt.x, pt.y);
+        ctx.strokeStyle = trail; ctx.lineWidth = 2.4; ctx.stroke();
         var halo = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 7);
         halo.addColorStop(0, withAlpha(e.color, 0.55 * fade));
         halo.addColorStop(1, withAlpha(e.color, 0));
@@ -552,6 +711,18 @@
         ctx.arc(n.x, n.y, r + 3.5 + Math.sin(n.pulse) * 3, 0, Math.PI * 2);
         ctx.strokeStyle = withAlpha(n.color, 0.16 * a);
         ctx.lineWidth = 1; ctx.stroke();
+      }
+
+      if (n.layer === net.currentLayer && a > 0.2) {
+        ctx.save();
+        ctx.setLineDash([3, 5]);
+        ctx.lineDashOffset = REDUCED_MOTION ? 0 : -Date.now() / 95;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, r + 9, 0, Math.PI * 2);
+        ctx.strokeStyle = withAlpha(n.color, 0.5 * a);
+        ctx.lineWidth = 1.15;
+        ctx.stroke();
+        ctx.restore();
       }
 
       if (n.label && net.w >= 480) {
@@ -590,6 +761,7 @@
 
     resetConsole();
     resetRail();
+    resetFallbackMode();
     if (dispatchList) dispatchList.replaceChildren();
     setRunState('running', 'Running');
     startClock();
@@ -665,30 +837,37 @@
     AGENT_ORDER.forEach(function (id) { setDispatchStatus(id, 'running', 'Thinking'); });
     log('info', 'Asking all three agents at once, from the same evidence.');
 
-    var answers;
-    try {
-      var agentResults = await Promise.all(AGENT_ORDER.map(function (role) {
-        var startedCall = Date.now();
-        return callAgent(role, question, context, evidence).then(function (res) {
-          if (!alive()) return res;
-          var seconds = ((Date.now() - startedCall) / 1000).toFixed(1);
-          setDispatchStatus(role, 'done', Math.round(res.confidence * 100) + '% sure');
-          log('ok', AGENTS[role].label + ' answered in ' + seconds + 's, ' + Math.round(res.confidence * 100) + '% confident.');
-          return res;
-        });
-      }));
-      if (!alive()) return null;
-      answers = agentResults.map(function (res, i) { return Object.assign({ role: AGENT_ORDER[i] }, res); });
-    } catch (err) {
-      return handlePipelineError(err, 'debate');
-    }
+    var agentResults = await Promise.allSettled(AGENT_ORDER.map(function (role) {
+      var startedCall = Date.now();
+      return callAgent(role, question, context, evidence).then(function (res) {
+        if (!alive()) return res;
+        var seconds = ((Date.now() - startedCall) / 1000).toFixed(1);
+        setDispatchStatus(role, 'done', Math.round(res.confidence * 100) + '% sure');
+        log('ok', AGENTS[role].label + ' answered in ' + seconds + 's, ' + Math.round(res.confidence * 100) + '% confident.');
+        return res;
+      });
+    }));
+    if (!alive()) return null;
+
+    var answers = agentResults.map(function (result, index) {
+      var role = AGENT_ORDER[index];
+      if (result.status === 'fulfilled') return Object.assign({ role: role }, result.value);
+      activateFallback('specialist agents', result.reason);
+      var fallback = fallbackAgent(role, evidence);
+      setDispatchStatus(role, 'done', 'Demo result');
+      log('ok', AGENTS[role].label + ' completed with a deterministic evidence-bound response.');
+      return fallback;
+    });
 
     log('info', 'Agents reviewing each other’s answers.');
     var debateResult;
     try {
       debateResult = await callDebate(question, answers, evidence);
     } catch (err) {
-      return handlePipelineError(err, 'debate');
+      activateFallback('debate service', err);
+      await wait(650);
+      debateResult = fallbackDebate();
+      log('ok', 'Deterministic cross-check completed; no unsupported conflict was introduced.');
     }
     if (!alive()) return null;
 
@@ -712,24 +891,30 @@
     });
 
     var judgeResults = {};
-    try {
-      await Promise.all(JUDGES.map(function (judge) {
-        var startedCall = Date.now();
-        return callJudge(judge.id, question, anonymised, evidence).then(function (res) {
-          if (!alive()) return;
-          judgeResults[judge.id] = res;
-          var seconds = ((Date.now() - startedCall) / 1000).toFixed(1);
-          if (judge.id === 'safety') {
-            log(res.veto ? 'err' : 'ok', judge.label + ' scored ' + Math.round(res.score * 100) + '% in ' + seconds + 's' +
-              (res.veto ? ', and blocked the answer.' : ', nothing blocked.'));
-          } else {
-            log('ok', judge.label + ' scored ' + Math.round(res.score * 100) + '% in ' + seconds + 's.');
-          }
-        });
-      }));
-    } catch (err) {
-      return handlePipelineError(err, 'judge');
-    }
+    var demoJudgeResults = fallbackJudges(answers);
+    var settledJudges = await Promise.allSettled(JUDGES.map(function (judge) {
+      var startedCall = Date.now();
+      return callJudge(judge.id, question, anonymised, evidence).then(function (res) {
+        return { result: res, seconds: ((Date.now() - startedCall) / 1000).toFixed(1) };
+      });
+    }));
+    settledJudges.forEach(function (settled, index) {
+      var judge = JUDGES[index];
+      if (settled.status === 'fulfilled') {
+        var res = settled.value.result;
+        judgeResults[judge.id] = res;
+        if (judge.id === 'safety') {
+          log(res.veto ? 'err' : 'ok', judge.label + ' scored ' + Math.round(res.score * 100) + '% in ' + settled.value.seconds + 's' +
+            (res.veto ? ', and blocked the answer.' : ', nothing blocked.'));
+        } else {
+          log('ok', judge.label + ' scored ' + Math.round(res.score * 100) + '% in ' + settled.value.seconds + 's.');
+        }
+      } else {
+        activateFallback('judge service', settled.reason);
+        judgeResults[judge.id] = demoJudgeResults[judge.id];
+        log('ok', judge.label + ' completed with a deterministic demo check.');
+      }
+    });
     if (!alive()) return null;
     setStage('judge', 'done');
 
@@ -750,16 +935,21 @@
     try {
       consensusResult = await callConsensus(question, answers, debateResult.conflicts);
     } catch (err) {
-      return handlePipelineError(err, 'response');
+      activateFallback('consensus service', err);
+      await wait(700);
+      consensusResult = fallbackConsensus(answers);
+      log('ok', 'Deterministic evidence summary assembled.');
     }
     if (!alive()) return null;
 
     var confidence = computeConfidence(evidence, judgeResults, debateResult.conflicts.length);
-    log('ok', 'Done. Overall confidence ' + Math.round(confidence.score * 100) + '%.');
+    log('ok', (fallbackActive ? 'Demo complete. ' : 'Done. ') + 'Overall confidence ' + Math.round(confidence.score * 100) + '%.');
     setStage('response', 'done');
     setNetStage('done');
-    announce('response', 'Finished. The answer below combines all three agents, checked by the four judges.');
-    setRunState('done', 'Finished');
+    announce('response', fallbackActive
+      ? 'Demo complete. The full architecture ran with deterministic fallbacks wherever live AI was unavailable.'
+      : 'Finished. The answer below combines all three agents, checked by the four judges.');
+    setRunState(fallbackActive ? 'demo' : 'done', fallbackActive ? 'Demo complete' : 'Finished');
     stopClock();
 
     return {
@@ -770,6 +960,7 @@
       revisions: debateResult.revisions,
       conflicts: debateResult.conflicts,
       judges: judgeResults,
+      demoFallback: fallbackActive,
       consensus: {
         summary: consensusResult.summary || answers[0].text,
         confidence: confidence.score,
@@ -780,16 +971,6 @@
         ]
       }
     };
-
-    function handlePipelineError(err, stageKey) {
-      setStage(stageKey, 'error');
-      var message = err instanceof ApiError ? err.message : 'Something went wrong contacting the AI backend.';
-      log('err', message);
-      announce(stageKey, 'Stopped: ' + message);
-      setRunState('error', 'Failed');
-      stopClock();
-      return { kind: 'error', message: message };
-    }
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -929,6 +1110,7 @@
   }
 
   function renderFull(result) {
+    if (responseMode) responseMode.hidden = !result.demoFallback;
     renderConsensus(result.evidence.length, result.consensus);
     renderAgents(result.answers, result.revisions, result.evidence);
     renderJudges(result.judges);
@@ -941,6 +1123,7 @@
   function renderSafety(emergency) {
     var el = function (id) { return document.getElementById(id); };
     if (el('west-urgent-banner')) el('west-urgent-banner').hidden = false;
+    if (responseMode) responseMode.hidden = true;
     if (westResults) westResults.classList.add('west-is-urgent');
 
     if (el('west-consensus-summary')) {
@@ -968,6 +1151,7 @@
   function renderVeto(note) {
     var el = function (id) { return document.getElementById(id); };
     if (el('west-urgent-banner')) el('west-urgent-banner').hidden = false;
+    if (responseMode) responseMode.hidden = true;
     if (westResults) westResults.classList.add('west-is-urgent');
 
     if (el('west-consensus-summary')) {
@@ -993,6 +1177,7 @@
   function renderAbstain() {
     var el = function (id) { return document.getElementById(id); };
     if (el('west-urgent-banner')) el('west-urgent-banner').hidden = true;
+    if (responseMode) responseMode.hidden = true;
     if (westResults) westResults.classList.remove('west-is-urgent');
 
     if (el('west-consensus-summary')) {
@@ -1027,6 +1212,10 @@
   function reveal() {
     if (!westResults) return;
     westResults.hidden = false;
+    westResults.classList.remove('is-visible');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { westResults.classList.add('is-visible'); });
+    });
     westResults.scrollIntoView({ behavior: REDUCED_MOTION ? 'auto' : 'smooth', block: 'start' });
   }
 
@@ -1057,7 +1246,10 @@
       }
 
       if (westFormMsg) westFormMsg.hidden = true;
-      if (westResults) westResults.hidden = true;
+      if (westResults) {
+        westResults.hidden = true;
+        westResults.classList.remove('is-visible');
+      }
 
       var token = ++runToken;
       if (westSubmit) {

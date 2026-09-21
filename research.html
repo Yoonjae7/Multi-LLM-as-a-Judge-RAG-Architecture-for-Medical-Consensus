@@ -651,8 +651,10 @@ td strong { color: var(--ink); font-weight: 600; }
       <p>
         Groq and Gemini's free tiers cap how many requests you can make per minute and per day. One
         question uses about nine AI calls, so a shared free key supports roughly a hundred full
-        questions a day before someone gets a "please slow down" error. We made sure that error
-        shows up clearly to the user instead of the page silently breaking.
+        questions a day before someone gets a "please slow down" error. When that happens, the
+        interface clearly enters demo fallback and completes the same architecture with deterministic
+        outputs grounded in the retrieved local evidence, rather than silently breaking or pretending
+        that those outputs came from a live model.
       </p>
 
       <h3>We could not fully test with real API keys during development</h3>
