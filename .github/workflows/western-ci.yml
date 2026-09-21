@@ -1,0 +1,46 @@
+name: MediRAG-West CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  western-rag-checks:
+    name: Western RAG checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run JavaScript syntax checks
+        run: npm test
+
+      - name: Scan tracked files for API keys
+        run: |
+          if git grep -n -E '(GROQ_API_KEY|GEMINI_API_KEY).{0,20}[A-Za-z0-9_-]{24,}' -- . ':!.env.example'; then
+            echo "::error::Potential provider API key found in tracked files."
+            exit 1
+          fi
+
+      - name: Check whitespace in working tree
+        run: git diff --check
+
+      - name: Check whitespace in pull request diff
+        if: github.event_name == 'pull_request'
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"

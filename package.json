@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "MediRAG-West: Multi-LLM-as-a-Judge RAG demo for Western medicine question answering. Static frontend plus Vercel Edge Functions in /api."
+  "description": "MediRAG-West: Multi-LLM-as-a-Judge RAG demo for Western medicine question answering. Static frontend plus Vercel Edge Functions in /api.",
+  "scripts": {
+    "test": "node --check app.js && node --check diagram.js && node --check west.js && node --check api/_lib/http.js && node --check api/_lib/llm.js && node --check api/_lib/prompts.js && node --check api/agent.js && node --check api/debate.js && node --check api/judge.js && node --check api/consensus.js"
+  }
 }

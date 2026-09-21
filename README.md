@@ -1,212 +1,89 @@
-# MediRAG-Judge Project 2: TCM-RAG
+# MediRAG-West
 
-This folder contains the standalone Traditional Chinese Medicine retrieval module for the MediRAG-Judge research internship. It is limited to the TCM-RAG stage only.
+MediRAG-West is a research prototype for evidence-grounded Western medicine question answering. It combines local retrieval, three specialist agents, a cross-examination round, four independent LLM judges, and a final consensus response.
 
-Not implemented here:
+The project provides educational health information only. It does not diagnose, prescribe, recommend doses, or replace qualified medical care.
 
-- MediRAG-West
-- full Multi-Agent Debate
-- full SafeJudge layer
-- final integrated dual-medicine response
+## Architecture
 
-The module is a research prototype, not a diagnosis or prescription system.
+1. A deterministic safety screen checks the question for urgent warning signs.
+2. A lexical retriever searches the local Western medicine evidence library.
+3. Western medicine, nutrition, and lifestyle agents independently answer from the same retrieved evidence.
+4. A debate stage flags overstatement and material disagreement.
+5. Evidence, safety, conflict, and confidence judges score anonymised answers.
+6. A consensus stage produces one evidence-aware response with safety notes and a deterministic confidence score.
 
-## What is completed
-
-- Static frontend with EN / 中文 / KR UI switching
-- FastAPI backend
-- `POST /api/tcm/consult`
-- SiliconFlow/OpenAI-compatible LLM integration
-- safe local fallback when no API key or provider failure
-- structured local TCM knowledge base in JSON
-- source registry
-- scope rules and abstention policy
-- lexical retrieval baseline with optional semantic/reranker hooks
-- relevance thresholding and evidence gate
-- safety-critical routing
-- structured API response for future Debate/Judge integration
-- evaluation dataset and metrics scaffold
-- tests for routing, fallback, LLM parsing, evidence gating, source integrity, and `.env` safety
+Specialist agents and synthesis run on Groq. Judges run on Gemini so a model family does not judge its own output.
 
 ## Project structure
 
 ```text
 .
-├── index.html
-├── app.js
-├── styles.css
-├── backend
-│   ├── main.py
-│   ├── .env.example
-│   ├── data
-│   │   ├── tcm_knowledge_base.json
-│   │   ├── tcm_sources.json
-│   │   └── tcm_scope_rules.json
-│   ├── evaluation
-│   │   ├── tcm_eval_questions.json
-│   │   ├── metrics.py
-│   │   └── run_evaluation.py
-│   ├── tcm
-│   │   ├── agent.py
-│   │   ├── scope.py
-│   │   ├── safety.py
-│   │   ├── validation.py
-│   │   └── retrieval
-│   └── tests
-└── docs
+├── index.html             Home page and live demo
+├── west.js                Western medicine retrieval and browser orchestration
+├── app.js                 Home/demo navigation
+├── research.html          Research report
+├── styles.css             Site and demo styling
+├── api
+│   ├── agent.js           Specialist agent endpoint
+│   ├── debate.js          Cross-examination endpoint
+│   ├── judge.js           Independent judge endpoint
+│   ├── consensus.js       Final synthesis endpoint
+│   └── _lib
+│       ├── http.js        Request and response helpers
+│       ├── llm.js         Groq and Gemini clients
+│       └── prompts.js     Grounding and safety prompts
+├── .env.example
+└── DEPLOY.md
 ```
 
-## Run backend
+## Run locally
 
-PowerShell:
+Requirements:
 
-```powershell
-cd D:\project\multi_agent_rag_research\TCM\backend
-.\.venv\Scripts\python.exe -m uvicorn main:app --reload --port 8000
+- Node.js 18 or newer
+- Vercel CLI
+- Groq and Gemini API keys
+
+Copy the environment template and add your keys:
+
+```bash
+cp .env.example .env.local
 ```
 
-If your local `.venv` launcher is broken, recreate it:
+Then run:
 
-```powershell
-cd D:\project\multi_agent_rag_research\TCM\backend
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m uvicorn main:app --reload --port 8000
+```bash
+npm install -g vercel
+vercel dev
 ```
 
-Health check:
+Open the local URL printed by Vercel. The frontend and `/api` functions must be served together for the full pipeline to work.
 
-```text
-http://localhost:8000/health
-```
-
-## Run frontend
-
-Open a second PowerShell window:
-
-```powershell
-cd D:\project\multi_agent_rag_research\TCM
-python -m http.server 5500
-```
-
-Open:
-
-```text
-http://localhost:5500
-```
-
-The static frontend defaults to `http://localhost:8000`. For deployment, set before `app.js` loads:
-
-```html
-<script>window.MEDIRAG_API_BASE_URL = "https://your-api.example.com";</script>
-```
-
-## SiliconFlow configuration
-
-Copy `backend/.env.example` to `backend/.env` and edit locally. Do not commit `.env`.
-
-Default free SiliconFlow models:
+## Environment variables
 
 ```dotenv
-LLM_MODEL=Qwen/Qwen2.5-7B-Instruct
-EMBEDDING_MODEL=BAAI/bge-m3
-RERANK_MODEL=BAAI/bge-reranker-v2-m3
+GROQ_API_KEY=
+GEMINI_API_KEY=
 ```
 
-If `LLM_API_KEY` is missing:
+Never commit real API keys. See [DEPLOY.md](DEPLOY.md) for deployment instructions.
 
-- `generation_source = "mock_fallback"`
-- `llm_error = "LLM_API_KEY is missing"`
+## Validation
 
-If the LLM call fails:
+Run the repository checks with:
 
-- local fallback is used
-- the UI shows that the local medical library is being used
-- the technical panel shows a short safe error message
-
-## Retrieval and evidence gate
-
-Default retrieval config:
-
-```dotenv
-RETRIEVAL_MODE=hybrid
-ENABLE_SEMANTIC_RETRIEVAL=false
-ENABLE_REMOTE_RERANK=false
-TOP_K_CANDIDATES=10
-TOP_K_EVIDENCE=4
-MIN_RELEVANCE_SCORE=0.18
+```bash
+npm test
 ```
 
-Because remote semantic retrieval is disabled by default, the backend reports `retrieval_method = "lexical"`. If no evidence passes the threshold, the system returns:
+The checks validate JavaScript syntax across the frontend and API functions. Clinical review and real-provider integration testing are still required before any research claims or public use.
 
-- `scope_status = "evidence_insufficient"`
-- `abstained = true`
-- empty `evidence`
-- empty `patterns`
-- empty `educational_examples`
-- no LLM generation
+## Safety and limitations
 
-## API states
-
-`scope_status`:
-
-- `supported`
-- `insufficient_information`
-- `out_of_scope`
-- `safety_critical`
-- `evidence_insufficient`
-
-`generation_source`:
-
-- `siliconflow_llm`
-- `mock_fallback`
-- `safety_rule`
-- `scope_rule`
-- `evidence_gate`
-
-The response includes `claims[]` with `evidence_ids`, citations, confidence, limitations, retrieval metadata, and localized result content in EN / zh / ko.
-
-## Tests
-
-From the project root or backend folder:
-
-```powershell
-python -m pytest
-```
-
-In this Codex environment, the project `.venv` package folder was usable but its launcher was broken, so tests were run with bundled Python plus `.venv\Lib\site-packages`.
-
-## Evaluation
-
-```powershell
-cd D:\project\multi_agent_rag_research\TCM\backend
-python -m evaluation.run_evaluation --no-llm
-```
-
-Outputs:
-
-- `backend/evaluation/results/last_results.json`
-- `backend/evaluation/results/manual_review.csv`
-
-Evaluation focuses on routing, retrieval, grounding structure, citation coverage, abstention, safety, and language behavior. It does not prove clinical correctness.
-
-## Documentation
-
-See:
-
-- `docs/tcm_scope.md`
-- `docs/tcm_architecture.md`
-- `docs/tcm_api_contract.md`
-- `docs/tcm_knowledge_base_methodology.md`
-- `docs/tcm_retrieval_experiments.md`
-- `docs/tcm_evaluation_plan.md`
-- `docs/limitations.md`
-
-## Known limitations and review requirements
-
-- The corpus is small and limited in scope.
-- All current TCM knowledge entries are marked `needs_human_review`.
-- Source details require human verification before publication.
-- Formula names are educational examples only, not recommendations.
-- No dose, preparation, prescription, or treatment plan is generated.
-- Automated tests do not replace clinical validation.
+- The local evidence library is deliberately small and supports a limited set of common questions.
+- Lexical retrieval is a transparent baseline, not a production clinical search engine.
+- The emergency screen is conservative but cannot detect every urgent presentation.
+- Generated claims are constrained to retrieved evidence, but LLM output still requires review.
+- Confidence is an experimental system score, not a probability of clinical correctness.
+- No part of this prototype should be used for diagnosis, prescribing, or emergency decision-making.

@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus</title>
-  <meta name="description" content="Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus, University of Nottingham research internship.">
+  <title>Multi-LLM-as-a-Judge RAG Architecture for Western Medicine</title>
+  <meta name="description" content="A multi-LLM-as-a-judge RAG architecture for evidence-grounded Western medicine question answering, developed during a University of Nottingham research internship.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=20260820-west-pipeline">
 </head>
 <body>
@@ -17,7 +17,6 @@
     <span class="orb orb-2"></span>
     <span class="orb orb-3"></span>
   </div>
-
   <header class="site-header">
     <a href="#" class="logo-link" aria-label="University of Nottingham">
       <img src="nottingham-brand-blue-horizontal.png" alt="University of Nottingham" class="logo">
@@ -33,21 +32,16 @@
       <a href="#research">Research</a>
       <a href="research.html" class="nav-paper">Paper</a>
     </nav>
-    <div class="language-switch glass" aria-label="Language mode">
-      <button type="button" class="language-btn is-active" data-lang="en" aria-pressed="true">EN</button>
-      <button type="button" class="language-btn" data-lang="ko" aria-pressed="false">KR</button>
-      <button type="button" class="language-btn" data-lang="zh" aria-pressed="false">中文</button>
-    </div>
   </header>
 
   <main id="home-view" class="view-panel">
     <section id="team" class="hero">
       <p class="eyebrow">University of Nottingham · Research Internship</p>
-      <h1>Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus</h1>
+      <h1>Multi-LLM-as-a-Judge RAG Architecture for Western Medicine</h1>
       <p class="lead">
         A multi-agent healthcare AI framework combining Retrieval-Augmented Generation, Agentic AI,
-        and LLM-as-a-Judge to deliver evidence-grounded, explainable health information across
-        Western Medicine, Traditional Chinese Medicine, Nutrition, and Lifestyle Medicine.
+        and LLM-as-a-Judge to deliver evidence-grounded, explainable Western medicine information
+        with complementary nutrition and lifestyle perspectives.
       </p>
 
       <div class="team-list">
@@ -90,7 +84,7 @@
       <ul class="plain-list">
         <li><strong>Hallucinations.</strong> Models generate plausible but unsupported medical claims without grounding in authoritative sources.</li>
         <li><strong>Lack of evidence transparency.</strong> Responses rarely cite clinical guidelines, literature, or explain the strength of underlying evidence.</li>
-        <li><strong>Conflicting paradigms.</strong> Systems cannot reconcile recommendations from different medical traditions and knowledge bases.</li>
+        <li><strong>Fragmented perspectives.</strong> Systems struggle to reconcile clinical, nutrition, and lifestyle recommendations grounded in different evidence sources.</li>
         <li><strong>Poor safety governance.</strong> Unsafe advice, contraindications, and unsupported claims often pass through without automated review.</li>
         <li><strong>Limited explainability.</strong> Users receive single opaque answers rather than transparent reasoning, uncertainty, or disagreement.</li>
       </ul>
@@ -98,8 +92,8 @@
       <div class="vision">
         <p class="vision-label">Research Vision</p>
         <p>
-          To develop a trustworthy and explainable healthcare AI ecosystem that intelligently integrates
-          knowledge from multiple medical paradigms, verifies recommendations through evidence-aware AI judges,
+          To develop a trustworthy and explainable Western medicine AI ecosystem that intelligently integrates
+          clinical, nutrition, and lifestyle evidence, verifies recommendations through evidence-aware AI judges,
           and provides transparent, safety-conscious health guidance, transforming healthcare AI from a
           single-answer chatbot into a virtual multidisciplinary advisory board.
         </p>
@@ -154,11 +148,11 @@
         <section class="arch-stage arch-stage-retrieval" aria-label="Retrieval stage">
           <div class="arch-stage-header">
             <span class="metric-kicker">Retrieval</span>
-            <h3>Dual Evidence Grounding</h3>
-            <p>Western medicine and TCM evidence sources are retrieved separately before being reconciled.</p>
+            <h3>Authoritative Evidence Grounding</h3>
+            <p>Western medical guidance and biomedical literature are retrieved before specialist agents produce their answers.</p>
           </div>
 
-          <div class="arch-layer arch-layer-dual layer-animate" data-layer="3">
+          <div class="arch-layer layer-animate" data-layer="3">
             <div class="arch-node node-blue arch-node-wide" tabindex="0"
                  data-tooltip="Evidence-grounded RAG for modern medicine. Retrieves from authoritative Western medical sources to support evidence-based recommendations with citations.">
               <div class="node-text">
@@ -170,19 +164,6 @@
                 <li>Biomedical Literature (PubMed)</li>
                 <li>Drug Databases</li>
                 <li>Systematic Reviews</li>
-              </ul>
-            </div>
-            <div class="arch-node node-green arch-node-wide" tabindex="0"
-                 data-tooltip="Specialised RAG for Traditional Chinese Medicine. Retrieves TCM knowledge including syndrome differentiation, herbal medicine, and acupuncture theory.">
-              <div class="node-text">
-                <strong>TCM-RAG</strong>
-                <span>Traditional Chinese Medicine retrieval</span>
-              </div>
-              <ul class="node-sources">
-                <li>TCM Textbooks &amp; Classics</li>
-                <li>Herbal Medicine Databases</li>
-                <li>Acupuncture &amp; Meridian Knowledge</li>
-                <li>TCM Clinical Guidelines &amp; Studies</li>
               </ul>
             </div>
           </div>
@@ -206,11 +187,6 @@
                    data-tooltip="Provides evidence-based recommendations from a modern Western medicine perspective, grounded in retrieved clinical guidelines and literature.">
                 <strong>Western Medicine Agent</strong>
                 <span>Evidence-based modern medicine</span>
-              </div>
-              <div class="arch-node node-green arch-node-sm" tabindex="0"
-                   data-tooltip="Generates recommendations based on TCM theory, syndrome differentiation, herbal knowledge, and constitution analysis.">
-                <strong>TCM Agent</strong>
-                <span>TCM theory, syndrome differentiation, herbal knowledge</span>
               </div>
               <div class="arch-node node-orange arch-node-sm" tabindex="0"
                    data-tooltip="Provides nutrition-related recommendations and dietary guidance aligned with the user's health context.">
@@ -242,9 +218,9 @@
                 <span>Detects risks and contraindications</span>
               </div>
               <div class="arch-node node-orange arch-node-sm" tabindex="0"
-                   data-tooltip="Identifies conflicts between agents and medical paradigms, surfacing areas of disagreement for transparent resolution.">
+                   data-tooltip="Identifies conflicts between specialist agents, surfacing material disagreements for transparent resolution.">
                 <strong>Conflict Judge</strong>
-                <span>Identifies conflicts between paradigms</span>
+                <span>Identifies conflicts between agents</span>
               </div>
               <div class="arch-node node-purple arch-node-sm" tabindex="0"
                    data-tooltip="Estimates overall confidence and uncertainty levels, helping users understand how reliable each recommendation is.">
@@ -284,10 +260,10 @@
       <ol class="rq-list">
         <li>Can multi-agent retrieval and reasoning improve the factual accuracy and completeness of healthcare question answering compared with conventional RAG systems?</li>
         <li>Can LLM-as-a-Judge mechanisms effectively detect hallucinations, unsafe recommendations, and unsupported claims in healthcare AI outputs?</li>
-        <li>How can AI systems reconcile recommendations from different medical paradigms while maintaining transparency and user trust?</li>
+        <li>How can AI systems reconcile clinical, nutrition, and lifestyle recommendations while maintaining transparency and user trust?</li>
         <li>Does multi-agent debate and consensus-building improve healthcare answer quality compared with single-agent generation?</li>
         <li>How should healthcare AI communicate evidence strength, uncertainty, and conflicting viewpoints to end users?</li>
-        <li>Can integrative healthcare AI increase user confidence and perceived trustworthiness without sacrificing scientific rigor?</li>
+        <li>Can multi-perspective Western medicine AI increase user confidence and perceived trustworthiness without sacrificing scientific rigor?</li>
       </ol>
     </section>
   </main>
@@ -298,32 +274,8 @@
       <h1 class="demo-title"></h1>
       <p class="demo-lead"></p>
 
-      <div class="demo-options glass mode-west" role="radiogroup" aria-label="">
-        <span class="demo-slider" aria-hidden="true"></span>
-        <button type="button" class="demo-option demo-option-west is-selected" data-mode="west" data-index="0" role="radio" aria-checked="true">
-          <span class="demo-option-label"></span>
-          <span class="demo-option-desc"></span>
-        </button>
-        <button type="button" class="demo-option demo-option-tcm" data-mode="tcm" data-index="1" role="radio" aria-checked="false">
-          <span class="demo-option-label"></span>
-          <span class="demo-option-desc"></span>
-        </button>
-        <button type="button" class="demo-option demo-option-both" data-mode="both" data-index="2" role="radio" aria-checked="false">
-          <span class="demo-option-label"></span>
-          <span class="demo-option-desc"></span>
-        </button>
-      </div>
-
-      <div class="prototype-status glass" role="status">
-        <span class="status-dot" aria-hidden="true"></span>
-        <div>
-          <strong></strong>
-          <span></span>
-        </div>
-      </div>
-
       <!-- ════ WEST CONSULTATION ════ -->
-      <div id="west-consultation" class="west-consultation" aria-labelledby="west-consultation-title" hidden>
+      <div id="west-consultation" class="west-consultation" aria-labelledby="west-consultation-title">
         <div class="west-panel glass">
           <div class="west-panel-heading">
             <div>
@@ -488,152 +440,12 @@
       </div>
       <!-- ════ END WEST CONSULTATION ════ -->
 
-      <div id="tcm-consultation" class="tcm-consultation" aria-labelledby="tcm-consultation-title" hidden>
-        <div class="tcm-panel glass">
-          <div class="tcm-panel-heading">
-            <div>
-              <p class="tcm-kicker"></p>
-              <h2 id="tcm-consultation-title"></h2>
-              <p></p>
-            </div>
-            <span class="tcm-live-badge"><span aria-hidden="true"></span><span class="tcm-live-label"></span></span>
-          </div>
-
-          <form id="tcm-consult-form" novalidate>
-            <label class="tcm-field tcm-question-field" for="tcm-question">
-              <span></span>
-              <textarea id="tcm-question" name="question" rows="4" minlength="3" maxlength="2000" required placeholder=""></textarea>
-              <small></small>
-            </label>
-
-            <div class="tcm-samples" aria-label="">
-              <span></span>
-              <button type="button" class="tcm-sample" data-question=""></button>
-              <button type="button" class="tcm-sample" data-question=""></button>
-              <button type="button" class="tcm-sample" data-question=""></button>
-            </div>
-
-            <details class="tcm-context">
-              <summary><span class="tcm-context-title"></span> <span class="tcm-context-hint"></span></summary>
-              <div class="tcm-context-grid">
-                <label class="tcm-field" for="tcm-age"><span></span><input id="tcm-age" name="age" type="text" inputmode="numeric" maxlength="40" placeholder=""></label>
-                <label class="tcm-field" for="tcm-gender"><span></span><select id="tcm-gender" name="gender"><option value=""></option><option value="female"></option><option value="male"></option><option value="non-binary"></option><option value="self-described"></option></select></label>
-                <label class="tcm-field" for="tcm-duration"><span></span><input id="tcm-duration" name="duration" type="text" maxlength="160" placeholder=""></label>
-                <label class="tcm-field" for="tcm-pregnancy"><span></span><select id="tcm-pregnancy" name="pregnancy"><option value=""></option><option value="no"></option><option value="yes"></option><option value="trying"></option><option value="breastfeeding"></option><option value="unknown"></option></select></label>
-                <label class="tcm-field tcm-field-wide" for="tcm-medications"><span></span><input id="tcm-medications" name="medications" type="text" maxlength="500" placeholder=""></label>
-                <label class="tcm-field tcm-field-wide" for="tcm-allergies"><span></span><input id="tcm-allergies" name="allergies" type="text" maxlength="500" placeholder=""></label>
-              </div>
-            </details>
-
-            <div class="tcm-form-footer">
-              <p></p>
-              <button id="tcm-submit" class="tcm-submit" type="submit">
-                <span class="tcm-submit-label"></span>
-                <span class="tcm-spinner" aria-hidden="true"></span>
-              </button>
-            </div>
-            <p id="tcm-form-message" class="tcm-form-message" role="alert" hidden></p>
-          </form>
-        </div>
-
-        <section id="tcm-results" class="tcm-results" aria-live="polite" aria-busy="false" hidden>
-          <div class="tcm-result-hero glass">
-            <div>
-              <div class="tcm-result-meta">
-                <span></span>
-                <span id="tcm-generation-mode" class="tcm-source-badge"></span>
-              </div>
-              <h2></h2>
-              <p id="tcm-grounding-note" class="tcm-grounding-note"></p>
-              <p id="tcm-summary"></p>
-              <details id="tcm-full-answer-details" class="tcm-inline-details" hidden>
-                <summary></summary>
-                <p id="tcm-summary-full"></p>
-              </details>
-            </div>
-            <div class="tcm-confidence" aria-label="">
-              <strong id="tcm-confidence-score">0%</strong>
-              <span id="tcm-confidence-level"></span>
-            </div>
-          </div>
-
-          <div id="tcm-urgent" class="tcm-urgent" role="alert" hidden>
-            <strong></strong>
-            <span></span>
-          </div>
-
-          <div id="tcm-fallback-banner" class="tcm-fallback-banner" role="status" hidden>
-            <strong></strong>
-            <span></span>
-          </div>
-
-          <div id="tcm-state-card" class="tcm-state-card glass" role="status" hidden>
-            <strong id="tcm-state-title"></strong>
-            <span id="tcm-state-body"></span>
-          </div>
-
-          <div class="tcm-result-grid">
-            <section class="tcm-result-card glass">
-              <div class="tcm-card-heading"><span class="tcm-card-icon pattern-icon" aria-hidden="true">辨</span><div><p></p><h3></h3></div></div>
-              <div id="tcm-patterns" class="tcm-card-list"></div>
-            </section>
-            <section class="tcm-result-card glass">
-              <div class="tcm-card-heading"><span class="tcm-card-icon formula-icon" aria-hidden="true">方</span><div><p></p><h3></h3></div></div>
-              <div id="tcm-formulas" class="tcm-card-list"></div>
-            </section>
-          </div>
-
-          <section class="tcm-result-card glass tcm-safety-card">
-            <div class="tcm-card-heading"><span class="tcm-card-icon safety-icon" aria-hidden="true">!</span><div><p></p><h3></h3></div></div>
-            <ul id="tcm-safety-notes"></ul>
-          </section>
-
-          <p id="tcm-evidence-summary" class="tcm-evidence-summary"></p>
-
-          <div class="tcm-accordions">
-            <details id="tcm-patterns-extra-details" class="tcm-result-details glass" hidden>
-              <summary></summary>
-              <div id="tcm-patterns-extra" class="tcm-card-list"></div>
-            </details>
-            <details id="tcm-formulas-extra-details" class="tcm-result-details glass" hidden>
-              <summary></summary>
-              <div id="tcm-formulas-extra" class="tcm-card-list"></div>
-            </details>
-            <details id="tcm-evidence-details" class="tcm-result-details glass">
-              <summary></summary>
-              <div id="tcm-evidence" class="tcm-evidence-list"></div>
-            </details>
-            <details id="tcm-safety-extra-details" class="tcm-result-details glass" hidden>
-              <summary></summary>
-              <ul id="tcm-safety-notes-extra" class="tcm-safety-list"></ul>
-            </details>
-            <details class="tcm-result-details glass">
-              <summary></summary>
-              <dl class="tcm-technical-list">
-                <div><dt id="tcm-source-label"></dt><dd id="tcm-generation-source">—</dd></div>
-                <div><dt id="tcm-model-label"></dt><dd id="tcm-llm-model">—</dd></div>
-                <div><dt id="tcm-response-language-label"></dt><dd id="tcm-response-language">—</dd></div>
-                <div><dt id="tcm-evidence-count-label"></dt><dd id="tcm-evidence-count">0</dd></div>
-                <div><dt id="tcm-retrieval-method-label"></dt><dd id="tcm-retrieval-method">—</dd></div>
-                <div><dt id="tcm-meaningful-count-label"></dt><dd id="tcm-meaningful-count">0</dd></div>
-                <div><dt id="tcm-top-score-label"></dt><dd id="tcm-top-score">0%</dd></div>
-                <div id="tcm-llm-error-row"><dt id="tcm-error-label"></dt><dd id="tcm-llm-error">—</dd></div>
-              </dl>
-              <p id="tcm-confidence-reason" class="tcm-technical-note"></p>
-            </details>
-          </div>
-
-          <div class="tcm-result-footer">
-            <p id="tcm-disclaimer"></p>
-          </div>
-        </section>
-      </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <p>&copy; 2026 University of Nottingham Research Internship</p>
-    <p class="footer-sub">Multi-LLM-as-a-Judge RAG Architecture for Medical Consensus - website by Yoonjae Lee</p>
+    <p class="footer-sub">Multi-LLM-as-a-Judge RAG Architecture for Western Medicine - website by Yoonjae Lee</p>
   </footer>
   <!-- ════ RESEARCH PAPER FAB ════ -->
   <a href="research.html" class="research-fab" aria-label="Read the research paper">
@@ -652,6 +464,6 @@
 
   <script src="diagram.js"></script>
   <script src="west.js?v=20260820-west-pipeline"></script>
-  <script src="app.js?v=20260712-tcm-research"></script>
+  <script src="app.js?v=20260922-western-only"></script>
 </body>
 </html>
