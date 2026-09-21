@@ -16,7 +16,7 @@ export default async function handler(request) {
 
   try {
     const { parsed, model } = await callGroq(
-      debateSystemPrompt(),
+      debateSystemPrompt(body.language),
       debateUserPrompt(body.question, body.answers, body.evidence || []),
       { temperature: 0.2, maxTokens: 500 }
     );

@@ -20,6 +20,16 @@
 (function () {
   'use strict';
 
+  function ui(path, variables, fallback) {
+    return window.MediRAGI18n
+      ? window.MediRAGI18n.t(path, variables || {}, fallback)
+      : (fallback || path);
+  }
+
+  function language() {
+    return window.MediRAGI18n ? window.MediRAGI18n.getLanguage() : 'en';
+  }
+
   var REDUCED_MOTION = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -39,12 +49,42 @@
   };
   var AGENT_ORDER = ['western', 'nutrition', 'lifestyle'];
 
+  function agentIndex(id) { return AGENT_ORDER.indexOf(id); }
+  function agentLabel(id) {
+    var spec = AGENTS[id];
+    return ui('architecture.agents.' + agentIndex(id) + '.0', {}, spec ? spec.label : id);
+  }
+  function agentRemit(id) {
+    var spec = AGENTS[id];
+    return ui('architecture.agents.' + agentIndex(id) + '.1', {}, spec ? spec.remit : '');
+  }
+  function agentShort(id) {
+    if (language() === 'ko') return ({ western: '서양의학', nutrition: '영양', lifestyle: '생활습관' })[id] || id;
+    return AGENTS[id] ? AGENTS[id].short : id;
+  }
+
   var JUDGES = [
     { id: 'evidence',   label: 'Evidence Judge',   short: 'Evidence',   color: '#3b82f6', axis: 'Checks citation quality' },
     { id: 'safety',     label: 'Safety Judge',     short: 'Safety',     color: '#ef4444', axis: 'Detects risks and contraindications' },
     { id: 'conflict',   label: 'Conflict Judge',   short: 'Conflict',   color: '#f59e0b', axis: 'Identifies conflicts between agents' },
     { id: 'confidence', label: 'Confidence Judge', short: 'Confidence', color: '#a78bfa', axis: 'Estimates uncertainty levels' }
   ];
+
+  function judgeLabel(index) { return ui('architecture.judges.' + index + '.0', {}, JUDGES[index].label); }
+  function judgeShort(index) {
+    if (language() === 'ko') return ['근거', '안전', '충돌', '신뢰도'][index];
+    return JUDGES[index].short;
+  }
+
+  function emergencyReason(reason) {
+    if (language() !== 'ko') return reason;
+    return ({
+      'heart or breathing emergency': '심장 또는 호흡 응급 상황',
+      'stroke or other acute brain event': '뇌졸중 또는 급성 뇌 질환',
+      'severe allergic reaction, bleeding or infection': '심각한 알레르기 반응, 출혈 또는 감염',
+      'risk of self-harm': '자해 위험'
+    })[reason] || reason;
+  }
 
   var STAGE_CAPTIONS = {
     question:  { name: 'Question', explain: 'Your question enters the system.' },
@@ -65,10 +105,10 @@
      ───────────────────────────────────────────────────────── */
 
   var EMERGENCY_RULES = [
-    { reason: 'heart or breathing emergency', terms: ['crushing chest pain', 'severe chest pain', 'cannot breathe', "can't breathe", 'struggling to breathe', 'blue lips', 'chest pain radiating'] },
-    { reason: 'stroke or other acute brain event', terms: ['face droop', 'face is drooping', 'slurred speech', 'one-sided weakness', 'sudden weakness', 'worst headache of my life', 'thunderclap', 'seizure', 'passed out', 'fainted', 'unresponsive'] },
-    { reason: 'severe allergic reaction, bleeding or infection', terms: ['throat swelling', 'throat is closing', 'anaphylaxis', 'severe allergic reaction', 'uncontrolled bleeding', "won't stop bleeding", 'coughing up blood', 'stiff neck and fever'] },
-    { reason: 'risk of self-harm', terms: ['suicide', 'kill myself', 'end my life', 'self-harm', 'hurt myself'] }
+    { reason: 'heart or breathing emergency', terms: ['crushing chest pain', 'severe chest pain', 'cannot breathe', "can't breathe", 'struggling to breathe', 'blue lips', 'chest pain radiating', '가슴이 심하게 아프', '심한 흉통', '숨을 쉴 수 없', '숨이 안 쉬', '호흡이 어렵'] },
+    { reason: 'stroke or other acute brain event', terms: ['face droop', 'face is drooping', 'slurred speech', 'one-sided weakness', 'sudden weakness', 'worst headache of my life', 'thunderclap', 'seizure', 'passed out', 'fainted', 'unresponsive', '얼굴이 처지', '말이 어눌', '한쪽에 힘이 없', '갑작스러운 마비', '발작', '의식을 잃', '실신'] },
+    { reason: 'severe allergic reaction, bleeding or infection', terms: ['throat swelling', 'throat is closing', 'anaphylaxis', 'severe allergic reaction', 'uncontrolled bleeding', "won't stop bleeding", 'coughing up blood', 'stiff neck and fever', '목이 붓', '심한 알레르기', '피가 멈추지', '피를 토', '목이 뻣뻣하고 열'] },
+    { reason: 'risk of self-harm', terms: ['suicide', 'kill myself', 'end my life', 'self-harm', 'hurt myself', '자살', '죽고 싶', '자해'] }
   ];
 
   function screenForEmergency(question) {
@@ -154,8 +194,22 @@
     'is are was were be been being it its this that these those do does did not no nor very really just feel feeling ' +
     'getting been having about since days weeks months years ago recently lately').split(' ');
 
+  var KOREAN_QUERY_TERMS = {
+    '두통': 'headache', '머리가 아프': 'headache', '피로': 'fatigue', '피곤': 'fatigue tired', '기운이 없': 'fatigue',
+    '가슴 통증': 'chest pain', '흉통': 'chest pain', '가슴이 조이': 'chest tightness', '계단': 'exertion', '빨리 걸': 'exertion',
+    '혈압': 'blood pressure hypertension', '허리 통증': 'back pain', '허리가 아프': 'back pain', '좌골신경통': 'sciatica',
+    '감기': 'cold', '기침': 'cough', '목이 아프': 'sore throat', '콧물': 'runny nose', '알레르기': 'allergy', '재채기': 'sneezing',
+    '복부 팽만': 'bloating', '배가 부풀': 'bloating', '소화': 'digestive', '과민성 대장': 'ibs',
+    '잠이 안': 'sleep insomnia', '불면': 'insomnia', '불안': 'anxiety', '스트레스': 'stress', '카페인': 'caffeine',
+    '운동': 'exercise activity', '소금': 'salt sodium', '식단': 'diet nutrition', '철분': 'iron'
+  };
+
   function tokenize(text) {
-    return (text.toLowerCase().match(/[a-z']+/g) || []).filter(function (w) {
+    var normalized = text.toLowerCase();
+    Object.keys(KOREAN_QUERY_TERMS).forEach(function (term) {
+      if (normalized.indexOf(term) !== -1) normalized += ' ' + KOREAN_QUERY_TERMS[term];
+    });
+    return (normalized.match(/[a-z']+/g) || []).filter(function (w) {
       return w.length >= 3 && STOPWORDS.indexOf(w) === -1;
     });
   }
@@ -293,16 +347,16 @@
   }
 
   function callAgent(role, question, context, evidence) {
-    return postJson('/api/agent', { role: role, question: question, context: context, evidence: evidence });
+    return postJson('/api/agent', { role: role, question: question, context: context, evidence: evidence, language: language() });
   }
   function callDebate(question, answers, evidence) {
-    return postJson('/api/debate', { question: question, answers: answers, evidence: evidence });
+    return postJson('/api/debate', { question: question, answers: answers, evidence: evidence, language: language() });
   }
   function callJudge(axis, question, answers, evidence) {
-    return postJson('/api/judge', { axis: axis, question: question, answers: answers, evidence: evidence });
+    return postJson('/api/judge', { axis: axis, question: question, answers: answers, evidence: evidence, language: language() });
   }
   function callConsensus(question, answers, conflicts) {
-    return postJson('/api/consensus', { question: question, answers: answers, conflicts: conflicts });
+    return postJson('/api/consensus', { question: question, answers: answers, conflicts: conflicts, language: language() });
   }
 
   /* When provider calls are unavailable, keep the architecture explorable
@@ -335,18 +389,18 @@
 
   function fallbackAgent(role, evidence) {
     var source = evidenceForRole(role, evidence);
-    var prefix = role === 'nutrition'
+    var prefix = ui('dynamic.prefixes.' + role, {}, role === 'nutrition'
       ? 'From a nutrition perspective, '
       : role === 'lifestyle'
         ? 'From a lifestyle perspective, '
-        : 'From a Western medicine perspective, ';
+        : 'From a Western medicine perspective, ');
     var supported = firstSentence(source && source.snippet);
     var hasRoleMatch = evidenceMatchesRole(role, source);
     var text = supported
       ? prefix + supported.charAt(0).toLowerCase() + supported.slice(1)
       : prefix + 'the local evidence does not support a specific recommendation.';
     if (!hasRoleMatch && role !== 'western') {
-      text += ' The retrieved sources do not support a more specific ' + role + ' recommendation for this question.';
+      text += ' ' + ui('dynamic.unsupportedRole', { role: agentShort(role) }, 'The retrieved sources do not support a more specific ' + role + ' recommendation for this question.');
     }
     return {
       role: role,
@@ -354,7 +408,7 @@
       confidence: source && source.grade === 'High' ? 0.76 : 0.64,
       strength: source ? source.grade : 'Low',
       citedEvidenceIds: source ? [source.id] : [],
-      gap: 'Demo fallback cannot add facts beyond the local evidence shown below.',
+      gap: ui('dynamic.fallbackGap', {}, 'Demo fallback cannot add facts beyond the local evidence shown below.'),
       model: 'deterministic-demo'
     };
   }
@@ -370,10 +424,10 @@
   function fallbackJudges(answers) {
     var cited = answers.every(function (answer) { return (answer.citedEvidenceIds || []).length > 0; });
     return {
-      evidence: { axis: 'evidence', score: cited ? 0.84 : 0.62, note: 'Demo check: each displayed claim is linked to retrieved local evidence.', model: 'deterministic-demo' },
-      safety: { axis: 'safety', score: 0.82, note: 'Demo check: no diagnosis, dose, or medication-change instruction was generated.', veto: false, model: 'deterministic-demo' },
-      conflict: { axis: 'conflict', score: 0.88, note: 'Demo check: the specialist outputs differ in emphasis but do not materially conflict.', model: 'deterministic-demo' },
-      confidence: { axis: 'confidence', score: 0.74, note: 'Demo check: certainty is capped because these are deterministic fallback outputs.', model: 'deterministic-demo' }
+      evidence: { axis: 'evidence', score: cited ? 0.84 : 0.62, note: ui('dynamic.judgeNotes.0', {}, 'Demo check: each displayed claim is linked to retrieved local evidence.'), model: 'deterministic-demo' },
+      safety: { axis: 'safety', score: 0.82, note: ui('dynamic.judgeNotes.1', {}, 'Demo check: no diagnosis, dose, or medication-change instruction was generated.'), veto: false, model: 'deterministic-demo' },
+      conflict: { axis: 'conflict', score: 0.88, note: ui('dynamic.judgeNotes.2', {}, 'Demo check: the specialist outputs differ in emphasis but do not materially conflict.'), model: 'deterministic-demo' },
+      confidence: { axis: 'confidence', score: 0.74, note: ui('dynamic.judgeNotes.3', {}, 'Demo check: certainty is capped because these are deterministic fallback outputs.'), model: 'deterministic-demo' }
     };
   }
 
@@ -386,13 +440,15 @@
       summary: [
         western ? western.text : 'The local evidence supports only a limited educational response.',
         supporting.join(' '),
-        'This is a deterministic demonstration of the consensus workflow, not a live AI-generated clinical answer.'
+        ui('dynamic.fallbackEnd', {}, 'This is a deterministic demonstration of the consensus workflow, not a live AI-generated clinical answer.')
       ].filter(Boolean).join(' '),
-      safetyNotes: [
-        'This is general educational information, not a diagnosis or treatment plan.',
-        'Because demo fallback is active, have a qualified clinician assess any real or persistent health concern.',
-        'Seek urgent professional care if symptoms are severe, sudden, or rapidly worsening.'
-      ],
+      safetyNotes: [0, 1, 2].map(function (index) {
+        return ui('dynamic.fallbackSafety.' + index, {}, [
+          'This is general educational information, not a diagnosis or treatment plan.',
+          'Because demo fallback is active, have a qualified clinician assess any real or persistent health concern.',
+          'Seek urgent professional care if symptoms are severe, sudden, or rapidly worsening.'
+        ][index]);
+      }),
       model: 'deterministic-demo'
     };
   }
@@ -461,8 +517,8 @@
 
   function announce(key, overrideText) {
     var stage = STAGE_CAPTIONS[key];
-    if (netStageEl) netStageEl.textContent = stage ? stage.name : '';
-    if (netExplainEl) netExplainEl.textContent = overrideText || (stage ? stage.explain : '');
+    if (netStageEl) netStageEl.textContent = ui('dynamic.stage.' + key + '.0', {}, stage ? stage.name : '');
+    if (netExplainEl) netExplainEl.textContent = overrideText || ui('dynamic.stage.' + key + '.1', {}, stage ? stage.explain : '');
   }
 
   function log(level, message) {
@@ -486,12 +542,12 @@
       var head = mk('div', 'west-dispatch-head');
       head.append(
         mk('span', 'west-dispatch-dot'),
-        mk('span', 'west-dispatch-name', spec.label),
-        mk('span', 'west-dispatch-status', 'Waiting')
+        mk('span', 'west-dispatch-name', agentLabel(id)),
+        mk('span', 'west-dispatch-status', ui('dynamic.dispatch.waiting', {}, 'Waiting'))
       );
       var track = mk('span', 'west-dispatch-track');
       track.append(mk('span', 'west-dispatch-fill'));
-      row.append(head, mk('p', 'west-dispatch-remit', spec.remit), track);
+      row.append(head, mk('p', 'west-dispatch-remit', agentRemit(id)), track);
       dispatchList.append(row);
     });
   }
@@ -530,15 +586,15 @@
     var ctx = netCanvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    var specs = agentIds.map(function (id) { return AGENTS[id]; });
+    var specs = agentIds.map(function (id) { return { id: id, color: AGENTS[id].color }; });
 
     var layers = [
-      { label: 'Question',   color: '#38bdf8', count: 1, labels: [''] },
-      { label: 'Query Planner', color: '#22d3ee', count: 3, labels: null },
-      { label: 'MediRAG-West',  color: '#34d399', count: Math.max(3, Math.min(evidenceCount || 3, 5)), labels: null },
-      { label: 'Agent Debate', color: '#60a5fa', count: specs.length, labels: specs.map(function (a) { return a.short; }), colors: specs.map(function (a) { return a.color; }) },
-      { label: 'SafeJudge',  color: '#f472b6', count: 4, labels: JUDGES.map(function (j) { return j.short; }), colors: JUDGES.map(function (j) { return j.color; }) },
-      { label: 'Response',   color: '#fbbf24', count: 1, labels: [''] }
+      { label: ui('demo.rail.0', {}, 'Question'), color: '#38bdf8', count: 1, labels: [''] },
+      { label: ui('demo.rail.1', {}, 'Query Planner'), color: '#22d3ee', count: 3, labels: null },
+      { label: ui('demo.rail.2', {}, 'MediRAG-West'), color: '#34d399', count: Math.max(3, Math.min(evidenceCount || 3, 5)), labels: null },
+      { label: ui('demo.rail.3', {}, 'Agent Debate'), color: '#60a5fa', count: specs.length, labels: specs.map(function (a) { return agentShort(a.id); }), colors: specs.map(function (a) { return a.color; }) },
+      { label: ui('demo.rail.4', {}, 'SafeJudge'), color: '#f472b6', count: 4, labels: JUDGES.map(function (_, i) { return judgeShort(i); }), colors: JUDGES.map(function (j) { return j.color; }) },
+      { label: ui('demo.rail.5', {}, 'Response'), color: '#fbbf24', count: 1, labels: [''] }
     ];
 
     var padX = 54, padTop = 40, padBottom = 34;
@@ -763,7 +819,7 @@
     resetRail();
     resetFallbackMode();
     if (dispatchList) dispatchList.replaceChildren();
-    setRunState('running', 'Running');
+    setRunState('running', ui('dynamic.status.running', {}, 'Running'));
     startClock();
 
     if (runtime) runtime.hidden = false;
@@ -794,7 +850,7 @@
       log('err', 'Stopping here. No evidence search and no agents were run.');
       setStage('planner', 'error');
       announce('planner', 'Stopped at the Query Planner. When emergency signs are found, the system does not continue, because discussing symptoms could delay care.');
-      setRunState('urgent', 'Stopped for safety');
+      setRunState('urgent', ui('dynamic.status.urgent', {}, 'Stopped for safety'));
       stopClock();
       return { kind: 'safety', emergency: emergency };
     }
@@ -817,7 +873,7 @@
       log('warn', 'Stopping here rather than answering without evidence.');
       setStage('retrieval', 'error');
       announce('retrieval', 'Stopped at MediRAG-West. No source was a close enough match, so the system declines instead of guessing.');
-      setRunState('abstain', 'No answer given');
+      setRunState('abstain', ui('dynamic.status.abstain', {}, 'No answer given'));
       stopClock();
       return { kind: 'abstain' };
     }
@@ -834,7 +890,7 @@
     buildNetwork(AGENT_ORDER, evidence.length);
     setNetStage('debate');
     renderDispatch(AGENT_ORDER);
-    AGENT_ORDER.forEach(function (id) { setDispatchStatus(id, 'running', 'Thinking'); });
+    AGENT_ORDER.forEach(function (id) { setDispatchStatus(id, 'running', ui('dynamic.dispatch.thinking', {}, 'Thinking')); });
     log('info', 'Asking all three agents at once, from the same evidence.');
 
     var agentResults = await Promise.allSettled(AGENT_ORDER.map(function (role) {
@@ -842,7 +898,7 @@
       return callAgent(role, question, context, evidence).then(function (res) {
         if (!alive()) return res;
         var seconds = ((Date.now() - startedCall) / 1000).toFixed(1);
-        setDispatchStatus(role, 'done', Math.round(res.confidence * 100) + '% sure');
+        setDispatchStatus(role, 'done', ui('dynamic.dispatch.sure', { score: Math.round(res.confidence * 100) }, Math.round(res.confidence * 100) + '% sure'));
         log('ok', AGENTS[role].label + ' answered in ' + seconds + 's, ' + Math.round(res.confidence * 100) + '% confident.');
         return res;
       });
@@ -854,7 +910,7 @@
       if (result.status === 'fulfilled') return Object.assign({ role: role }, result.value);
       activateFallback('specialist agents', result.reason);
       var fallback = fallbackAgent(role, evidence);
-      setDispatchStatus(role, 'done', 'Demo result');
+      setDispatchStatus(role, 'done', ui('dynamic.dispatch.demo', {}, 'Demo result'));
       log('ok', AGENTS[role].label + ' completed with a deterministic evidence-bound response.');
       return fallback;
     });
@@ -920,7 +976,7 @@
 
     if (judgeResults.safety && judgeResults.safety.veto) {
       announce('judge', 'The Safety Judge blocked this answer. See the note below for why.');
-      setRunState('urgent', 'Blocked by SafeJudge');
+      setRunState('urgent', ui('dynamic.status.veto', {}, 'Blocked by SafeJudge'));
       stopClock();
       return { kind: 'veto', note: judgeResults.safety.note, question: question, evidence: evidence };
     }
@@ -949,7 +1005,9 @@
     announce('response', fallbackActive
       ? 'Demo complete. The full architecture ran with deterministic fallbacks wherever live AI was unavailable.'
       : 'Finished. The answer below combines all three agents, checked by the four judges.');
-    setRunState(fallbackActive ? 'demo' : 'done', fallbackActive ? 'Demo complete' : 'Finished');
+    setRunState(fallbackActive ? 'demo' : 'done', fallbackActive
+      ? ui('dynamic.status.demo', {}, 'Demo complete')
+      : ui('dynamic.status.done', {}, 'Finished'));
     stopClock();
 
     return {
@@ -982,10 +1040,10 @@
     if (el('west-consensus-summary')) el('west-consensus-summary').textContent = consensus.summary;
     if (el('west-conf-score')) el('west-conf-score').textContent = Math.round(consensus.confidence * 100) + '%';
     if (el('west-conf-label')) {
-      el('west-conf-label').textContent =
-        ({ low: 'Low confidence', medium: 'Moderate confidence', high: 'High confidence' })[consensus.level] || 'Confidence';
+      el('west-conf-label').textContent = ui('dynamic.confidence.' + consensus.level, {},
+        ({ low: 'Low confidence', medium: 'Moderate confidence', high: 'High confidence' })[consensus.level] || 'Confidence');
     }
-    if (el('west-evidence-count')) el('west-evidence-count').textContent = 'Based on ' + evidenceCount + ' sources';
+    if (el('west-evidence-count')) el('west-evidence-count').textContent = ui('dynamic.sources', { count: evidenceCount }, 'Based on ' + evidenceCount + ' sources');
     if (el('west-safety-list')) {
       el('west-safety-list').replaceChildren();
       consensus.safety.forEach(function (n) { el('west-safety-list').append(mk('li', 'west-safety-note', n)); });
@@ -1009,14 +1067,14 @@
       var head = mk('div', 'west-agent-head');
       head.append(
         mk('span', 'west-agent-dot'),
-        mk('h4', 'west-agent-title', spec.label),
+        mk('h4', 'west-agent-title', agentLabel(ans.role)),
         mk('span', 'west-conf-badge', Math.round(ans.confidence * 100) + '%')
       );
 
       card.append(head, mk('p', 'west-agent-body', ans.text));
 
-      if (revision) card.append(mk('p', 'west-agent-note', 'Revised after debate: ' + revision.note));
-      if (ans.gap) card.append(mk('p', 'west-agent-note', 'Could not tell: ' + ans.gap));
+      if (revision) card.append(mk('p', 'west-agent-note', ui('dynamic.agentNotes.revised', { note: revision.note }, 'Revised after debate: ' + revision.note)));
+      if (ans.gap) card.append(mk('p', 'west-agent-note', ui('dynamic.agentNotes.gap', { note: ans.gap }, 'Could not tell: ' + ans.gap)));
 
       var foot = mk('div', 'west-agent-foot');
       (ans.citedEvidenceIds || []).forEach(function (cid) {
@@ -1033,7 +1091,7 @@
     if (!container) return;
     container.replaceChildren();
 
-    JUDGES.forEach(function (judge) {
+    JUDGES.forEach(function (judge, judgeIndex) {
       var res = judgeResults[judge.id];
       if (!res) return;
       var card = mk('article', 'west-judge-card');
@@ -1065,7 +1123,7 @@
       txt.textContent = Math.round(res.score * 100) + '%';
 
       svg.append(bg, fg, txt);
-      card.append(svg, mk('h4', 'west-judge-title', judge.label), mk('p', 'west-judge-axis', res.note));
+      card.append(svg, mk('h4', 'west-judge-title', judgeLabel(judgeIndex)), mk('p', 'west-judge-axis', res.note));
       container.append(card);
 
       requestAnimationFrame(function () {
@@ -1097,7 +1155,7 @@
       var head = mk('div', 'west-evidence-head');
       head.append(
         mk('span', 'west-evidence-source', ev.source),
-        mk('span', 'west-grade west-grade-' + ev.grade.toLowerCase().replace(/\s+/g, '-'), ev.grade + ' certainty')
+        mk('span', 'west-grade west-grade-' + ev.grade.toLowerCase().replace(/\s+/g, '-'), ui('dynamic.evidenceCertainty', { grade: ev.grade }, ev.grade + ' certainty'))
       );
       card.append(head, mk('h4', 'west-evidence-title', ev.title), mk('p', 'west-evidence-snippet', ev.snippet));
       grid.append(card);
@@ -1127,22 +1185,16 @@
     if (westResults) westResults.classList.add('west-is-urgent');
 
     if (el('west-consensus-summary')) {
-      el('west-consensus-summary').textContent =
-        'Your question mentions signs of a possible ' + emergency.reason.toLowerCase() + '. ' +
-        'The system stopped straight away, so it did not search for evidence and did not run any agents. ' +
-        'That is deliberate, because discussing symptoms here could delay care. Please get urgent medical help now. ' +
-        'In the UK call 999, or 111 if you are unsure. Elsewhere, call your local emergency number or go to an emergency department.';
+      el('west-consensus-summary').textContent = ui('dynamic.special.safetySummary',
+        { reason: emergencyReason(emergency.reason).toLowerCase() },
+        'Your question mentions signs of a possible ' + emergency.reason.toLowerCase() + '. Please get urgent medical help now.');
     }
     if (el('west-conf-score')) el('west-conf-score').textContent = 'n/a';
-    if (el('west-conf-label')) el('west-conf-label').textContent = 'Safety stop';
-    if (el('west-evidence-count')) el('west-evidence-count').textContent = 'No evidence searched';
+    if (el('west-conf-label')) el('west-conf-label').textContent = ui('dynamic.special.safetyLabel', {}, 'Safety stop');
+    if (el('west-evidence-count')) el('west-evidence-count').textContent = ui('dynamic.special.noEvidence', {}, 'No evidence searched');
     if (el('west-safety-list')) {
       el('west-safety-list').replaceChildren();
-      [
-        'If this is an emergency, call emergency services now. Do not wait for any AI system.',
-        'If you are having thoughts of harming yourself, contact your local crisis line or emergency services immediately. In the UK, Samaritans are free on 116 123, at any hour.',
-        'This prototype does not assess or triage patients and must never be relied on in an emergency.'
-      ].forEach(function (n) { el('west-safety-list').append(mk('li', 'west-safety-note', n)); });
+      [0, 1, 2].forEach(function (i) { el('west-safety-list').append(mk('li', 'west-safety-note', ui('dynamic.special.safetyNotes.' + i, {}, 'Seek urgent professional care.'))); });
     }
     showDetail(false);
     reveal();
@@ -1155,20 +1207,14 @@
     if (westResults) westResults.classList.add('west-is-urgent');
 
     if (el('west-consensus-summary')) {
-      el('west-consensus-summary').textContent =
-        'The Safety Judge blocked this answer before it reached you. Its note: “' + note + '” ' +
-        'This is the SafeJudge veto described in the research report: a safety concern is never averaged away by ' +
-        'the other three judges, it stops the answer outright.';
+      el('west-consensus-summary').textContent = ui('dynamic.special.vetoSummary', { note: note }, 'The Safety Judge blocked this answer: “' + note + '”');
     }
     if (el('west-conf-score')) el('west-conf-score').textContent = 'n/a';
-    if (el('west-conf-label')) el('west-conf-label').textContent = 'Blocked by SafeJudge';
-    if (el('west-evidence-count')) el('west-evidence-count').textContent = 'Answer withheld';
+    if (el('west-conf-label')) el('west-conf-label').textContent = ui('dynamic.status.veto', {}, 'Blocked by SafeJudge');
+    if (el('west-evidence-count')) el('west-evidence-count').textContent = ui('dynamic.special.answerWithheld', {}, 'Answer withheld');
     if (el('west-safety-list')) {
       el('west-safety-list').replaceChildren();
-      [
-        'For a real health concern, speak to a qualified clinician rather than any AI system.',
-        'If this is urgent, contact emergency services rather than waiting for a system response.'
-      ].forEach(function (n) { el('west-safety-list').append(mk('li', 'west-safety-note', n)); });
+      [0, 1].forEach(function (i) { el('west-safety-list').append(mk('li', 'west-safety-note', ui('dynamic.special.vetoNotes.' + i, {}, 'Speak to a qualified clinician.'))); });
     }
     showDetail(false);
     reveal();
@@ -1181,22 +1227,14 @@
     if (westResults) westResults.classList.remove('west-is-urgent');
 
     if (el('west-consensus-summary')) {
-      el('west-consensus-summary').textContent =
-        'No answer was given, because the search did not find any local source close enough to your question. ' +
-        'The system is built to stop here rather than let a model answer from memory, since that is where ' +
-        'confident but unsupported claims come from. Try rephrasing, or ask about headaches and fatigue, chest ' +
-        'tightness, blood pressure, back pain, colds, allergies, digestion, or sleep and anxiety, the topics currently ' +
-        'in the local library.';
+      el('west-consensus-summary').textContent = ui('dynamic.special.abstainSummary', {}, 'No answer was given because no local source matched the question closely enough.');
     }
     if (el('west-conf-score')) el('west-conf-score').textContent = 'n/a';
-    if (el('west-conf-label')) el('west-conf-label').textContent = 'No answer';
-    if (el('west-evidence-count')) el('west-evidence-count').textContent = 'No matching sources';
+    if (el('west-conf-label')) el('west-conf-label').textContent = ui('dynamic.special.noAnswer', {}, 'No answer');
+    if (el('west-evidence-count')) el('west-evidence-count').textContent = ui('dynamic.special.noSources', {}, 'No matching sources');
     if (el('west-safety-list')) {
       el('west-safety-list').replaceChildren();
-      [
-        'Declining is safer than a fluent answer built on nothing.',
-        'For a real health concern, speak to a qualified clinician rather than any AI system.'
-      ].forEach(function (n) { el('west-safety-list').append(mk('li', 'west-safety-note', n)); });
+      [0, 1].forEach(function (i) { el('west-safety-list').append(mk('li', 'west-safety-note', ui('dynamic.special.abstainNotes.' + i, {}, 'Speak to a qualified clinician.'))); });
     }
     showDetail(false);
     reveal();
@@ -1204,7 +1242,7 @@
 
   function renderError(message) {
     if (westFormMsg) {
-      westFormMsg.textContent = message || 'The AI backend could not be reached. Check that GROQ_API_KEY and GEMINI_API_KEY are configured, then try again.';
+      westFormMsg.textContent = message || ui('dynamic.error', {}, 'The AI backend could not be reached. Please try again.');
       westFormMsg.hidden = false;
     }
   }
@@ -1238,7 +1276,7 @@
       var question = westQuestion ? westQuestion.value.trim() : '';
       if (question.length < 3) {
         if (westFormMsg) {
-          westFormMsg.textContent = 'Please enter a health question of at least 3 characters.';
+          westFormMsg.textContent = ui('dynamic.validation', {}, 'Please enter a health question of at least 3 characters.');
           westFormMsg.hidden = false;
         }
         if (westQuestion) westQuestion.focus();
@@ -1256,7 +1294,7 @@
         westSubmit.disabled = true;
         westSubmit.classList.add('is-loading');
         var lb = westSubmit.querySelector('.west-submit-label');
-        if (lb) lb.textContent = 'Running';
+        if (lb) lb.textContent = ui('dynamic.loading', {}, 'Running');
       }
       if (runtime) {
         runtime.hidden = false;
@@ -1274,7 +1312,7 @@
         })
         .catch(function (err) {
           if (token !== runToken) return;
-          setRunState('error', 'Failed');
+          setRunState('error', ui('dynamic.status.error', {}, 'Failed'));
           stopClock();
           renderError(err && err.message);
         })
@@ -1284,11 +1322,41 @@
             westSubmit.disabled = false;
             westSubmit.classList.remove('is-loading');
             var lb2 = westSubmit.querySelector('.west-submit-label');
-            if (lb2) lb2.textContent = 'Run MediRAG-West';
+            if (lb2) lb2.textContent = ui('dynamic.submit', {}, 'Run MediRAG-West');
           }
         });
     });
   }
+
+  window.addEventListener('medirag:languagechange', function () {
+    if (net) {
+      var stage = net.stage;
+      var evCount = net.layers[2].count;
+      stopNetwork();
+      buildNetwork(AGENT_ORDER, evCount);
+      setNetStage(stage);
+      startNetwork();
+      if (stage !== 'idle') announce(stage === 'done' ? 'response' : stage);
+    }
+    AGENT_ORDER.forEach(function (id) {
+      var row = document.getElementById('dispatch-' + id);
+      if (!row) return;
+      var name = row.querySelector('.west-dispatch-name');
+      var remit = row.querySelector('.west-dispatch-remit');
+      if (name) name.textContent = agentLabel(id);
+      if (remit) remit.textContent = agentRemit(id);
+    });
+    document.querySelectorAll('.west-agent-title').forEach(function (el, index) {
+      if (AGENT_ORDER[index]) el.textContent = agentLabel(AGENT_ORDER[index]);
+    });
+    document.querySelectorAll('.west-judge-title').forEach(function (el, index) {
+      if (JUDGES[index]) el.textContent = judgeLabel(index);
+    });
+    if (runStateEl && runStateLabel) {
+      var state = runStateEl.getAttribute('data-state') || 'running';
+      runStateLabel.textContent = ui('dynamic.status.' + state, {}, runStateLabel.textContent);
+    }
+  });
 
   var resizeTimer;
   window.addEventListener('resize', function () {

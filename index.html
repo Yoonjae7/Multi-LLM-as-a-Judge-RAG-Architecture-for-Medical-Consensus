@@ -32,6 +32,10 @@
       <a href="#research">Research</a>
       <a href="research.html" class="nav-paper">Paper</a>
     </nav>
+    <div class="language-switch glass" aria-label="Language">
+      <button type="button" class="language-btn is-active" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" class="language-btn" data-lang="ko" aria-pressed="false">KR</button>
+    </div>
   </header>
 
   <main id="home-view" class="view-panel">
@@ -424,17 +428,17 @@
             <h3 class="west-detail-title">How this answer was reached</h3>
 
             <div class="west-results-section">
-              <p class="west-step-label"><span class="west-step-num">1</span>Each agent answered from the same evidence</p>
+              <p class="west-step-label"><span class="west-step-num">1</span><span class="west-step-text">Each agent answered from the same evidence</span></p>
               <div id="west-agents-grid" class="west-agents-grid"></div>
             </div>
 
             <div class="west-results-section" id="west-conflict-section" hidden>
-              <p class="west-step-label"><span class="west-step-num">2</span>Where they disagreed</p>
+              <p class="west-step-label"><span class="west-step-num">2</span><span class="west-step-text">Where they disagreed</span></p>
               <ul id="west-conflict-list" class="west-conflict-list"></ul>
             </div>
 
             <div class="west-results-section">
-              <p class="west-step-label"><span class="west-step-num">3</span>Four judges scored the answers</p>
+              <p class="west-step-label"><span class="west-step-num">3</span><span class="west-step-text">Four judges scored the answers</span></p>
               <div id="west-judges-grid" class="west-judges-grid"></div>
             </div>
 
@@ -472,7 +476,7 @@
   </a>
 
   <script src="diagram.js"></script>
-  <script src="west.js?v=20260820-west-pipeline"></script>
-  <script src="app.js?v=20260922-western-only"></script>
+  <script src="west.js?v=20260922-bilingual-fallback"></script>
+  <script src="app.js?v=20260922-en-ko"></script>
 </body>
 </html>

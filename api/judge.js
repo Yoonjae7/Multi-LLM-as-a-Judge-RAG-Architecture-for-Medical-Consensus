@@ -18,7 +18,7 @@ export default async function handler(request) {
 
   try {
     const { parsed, model } = await callGemini(
-      judgeSystemPrompt(axis),
+      judgeSystemPrompt(axis, body.language),
       judgeUserPrompt(body.question, body.answers, body.evidence || []),
       { temperature: 0.15, maxTokens: 300 }
     );

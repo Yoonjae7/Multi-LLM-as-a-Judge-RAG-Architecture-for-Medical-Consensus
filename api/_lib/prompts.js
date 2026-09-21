@@ -24,11 +24,17 @@ const BASE_RULES = [
   'Write two to four plain sentences a layperson can follow. No headings, no bullet points, no markdown.'
 ].join(' ');
 
-function agentSystemPrompt(role) {
+function outputLanguageRule(language) {
+  return language === 'ko'
+    ? 'Write every user-facing JSON string value in natural Korean.'
+    : 'Write every user-facing JSON string value in English.';
+}
+
+function agentSystemPrompt(role, language = 'en') {
   const spec = AGENT_BRIEFS[role] || AGENT_BRIEFS.western;
   return (
     `You are the ${spec.label} inside a research prototype multi-agent medical question answering system. ` +
-    `${spec.brief} ${BASE_RULES} ` +
+    `${spec.brief} ${BASE_RULES} ${outputLanguageRule(language)} ` +
     'Return strict JSON with this exact shape: ' +
     '{"text":"...","confidence":0.0,"strength":"Low|Moderate|High","cited_evidence_ids":["E1"],"gap":"one sentence on what you could not tell from the evidence given"}. ' +
     'confidence is your own calibrated 0 to 1 estimate. strength describes how strong the cited evidence is, not how sure you sound.'
@@ -49,7 +55,7 @@ function agentUserPrompt(question, context, evidence) {
   );
 }
 
-function debateSystemPrompt() {
+function debateSystemPrompt(language = 'en') {
   return (
     'You are the cross-examination stage in a multi-agent medical prototype. Three specialist agents have each ' +
     'answered the same question from the same evidence. Read their answers and decide, for each agent, whether ' +
@@ -58,7 +64,7 @@ function debateSystemPrompt() {
     'Return strict JSON: {"revisions":[{"role":"western|nutrition|lifestyle","note":"one sentence on what should be ' +
     'softened or corrected, or omit this agent if nothing needs revising"}],"conflicts":[{"title":"short label",' +
     '"detail":"one to two sentences on the disagreement and how to resolve it"}]}. ' +
-    'Return empty arrays if there is nothing to flag. Do not invent disagreements that are not really there.'
+    `Return empty arrays if there is nothing to flag. Do not invent disagreements that are not really there. ${outputLanguageRule(language)}`
   );
 }
 
@@ -91,7 +97,7 @@ const JUDGE_BRIEFS = {
   }
 };
 
-function judgeSystemPrompt(axis) {
+function judgeSystemPrompt(axis, language = 'en') {
   const spec = JUDGE_BRIEFS[axis] || JUDGE_BRIEFS.evidence;
   const vetoClause = axis === 'safety'
     ? ' If you find a real safety problem serious enough that this answer should not reach the user as written, set veto to true.'
@@ -99,7 +105,7 @@ function judgeSystemPrompt(axis) {
   return (
     `You are the ${spec.label} in a multi-agent medical prototype, scoring anonymised agent answers. ${spec.task} ` +
     `Score independently. Do not let a good score on one aspect inflate your score on this one.${vetoClause} ` +
-    'Return strict JSON: {"score":0.0,"note":"one to two sentences explaining the score"' +
+    `${outputLanguageRule(language)} Return strict JSON: {"score":0.0,"note":"one to two sentences explaining the score"` +
     (axis === 'safety' ? ',"veto":false' : '') + '}.'
   );
 }
@@ -112,13 +118,13 @@ function judgeUserPrompt(question, answers, evidence) {
   );
 }
 
-function consensusSystemPrompt() {
+function consensusSystemPrompt(language = 'en') {
   return (
     'You write the final combined answer for a multi-agent medical research prototype. You are given the specialist ' +
     'agent answers, the conflicts between them, and safety judge notes. Merge them into one coherent answer in plain ' +
     'language, four to six sentences, that a layperson can follow. Mention any real disagreement between agents ' +
     'rather than hiding it. Do not diagnose, prescribe, or name a dose. ' +
-    'Return strict JSON: {"summary":"...","safety_notes":["...", "..."]}. ' +
+    `${outputLanguageRule(language)} Return strict JSON: {"summary":"...","safety_notes":["...", "..."]}. ` +
     'safety_notes should be two to four short, concrete, actionable notes, always including when to seek urgent care ' +
     'if that is relevant to the question.'
   );

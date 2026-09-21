@@ -19,7 +19,7 @@ export default async function handler(request) {
 
   try {
     const { parsed, model } = await callGroq(
-      agentSystemPrompt(role),
+      agentSystemPrompt(role, body.language),
       agentUserPrompt(body.question, body.context || {}, body.evidence),
       { temperature: 0.25, maxTokens: 500 }
     );
