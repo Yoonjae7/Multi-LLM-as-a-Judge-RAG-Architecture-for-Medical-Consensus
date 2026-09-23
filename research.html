@@ -207,6 +207,30 @@ code {
   color: #3b2f52;
 }
 
+.qa-item {
+  margin: 1rem 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--rule);
+  border-radius: 9px;
+  background: #fcfdff;
+  max-width: var(--measure);
+}
+.qa-item h3 { margin: 0 0 0.65rem; line-height: 1.5; }
+.qa-item p { margin: 0 0 0.65rem; font-size: 0.9rem; }
+.qa-item p:last-child { margin-bottom: 0; }
+.qa-answer-label {
+  display: inline-block;
+  margin-right: 0.35rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+.qa-status {
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--rule-soft);
+  color: var(--ink-faint) !important;
+  font-size: 0.8rem !important;
+}
+
 figure { margin: 1.6rem 0; }
 figure svg { display: block; width: 100%; height: auto; }
 .fig-frame { border: 1px solid var(--rule); border-radius: 10px; background: #fcfdfe; padding: 1.2rem; overflow-x: auto; }
@@ -263,7 +287,7 @@ td strong { color: var(--ink); font-weight: 600; }
   body { background: #fff; }
   .paper-shell { display: block; max-width: none; padding: 0; }
   .paper { border: none; padding: 0; }
-  figure, .table-wrap, .callout, .prompt-box { break-inside: avoid; }
+  figure, .table-wrap, .callout, .prompt-box, .qa-item { break-inside: avoid; }
 }
 </style>
 </head>
@@ -302,8 +326,9 @@ td strong { color: var(--ink); font-weight: 600; }
       <li><a href="#s3">3 &nbsp;How the system works</a></li>
       <li><a href="#s4">4 &nbsp;The prompts we wrote</a></li>
       <li><a href="#s5">5 &nbsp;Problems we ran into</a></li>
-      <li><a href="#s6">6 &nbsp;Limitations</a></li>
-      <li><a href="#s7">7 &nbsp;Conclusion</a></li>
+      <li><a href="#s6">6 &nbsp;Research questions and answers</a></li>
+      <li><a href="#s7">7 &nbsp;Limitations</a></li>
+      <li><a href="#s8">8 &nbsp;Conclusion</a></li>
       <li><a href="#refs">References</a></li>
     </ol>
   </nav>
@@ -677,7 +702,54 @@ td strong { color: var(--ink); font-weight: 600; }
 
     <!-- ══════ 6 ══════ -->
     <section id="s6">
-      <h2><span class="sec-num">6</span>Limitations</h2>
+      <h2><span class="sec-num">6</span>Research questions and answers</h2>
+      <p>
+        The project was guided by six questions. The answers below distinguish what the working
+        prototype demonstrates by design from what would still require controlled experiments,
+        clinical review, or a user study. They should therefore be read as current research
+        conclusions, not as claims of clinical effectiveness.
+      </p>
+
+      <div class="qa-item">
+        <h3>1. Can multi-agent retrieval and reasoning improve factual accuracy and completeness compared with conventional RAG?</h3>
+        <p><span class="qa-answer-label">Answer:</span>Potentially, but this prototype does not yet prove that it does. Retrieval limits the agents to a shared evidence set, while three specialists cover clinical, nutrition, and lifestyle considerations that one general answer may miss. Prior research reports factuality gains from retrieval and multi-agent debate<a href="#ref-1" class="cite">[1]</a><a href="#ref-2" class="cite">[2]</a>, but MediRAG-West still needs a controlled comparison against a conventional single-agent RAG baseline on the same medical questions.</p>
+        <p class="qa-status"><strong>Current status:</strong> Supported by the architecture and prior literature; not yet validated experimentally in this project.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>2. Can LLM-as-a-Judge mechanisms effectively detect hallucinations, unsafe recommendations, and unsupported claims?</h3>
+        <p><span class="qa-answer-label">Answer:</span>They can provide an additional safeguard, but they cannot be treated as a perfect or independent medical verifier. MediRAG-West separates evidence, safety, conflict, and confidence checks, allows the Safety Judge to veto an answer, and uses a different model provider for judging. This should expose more problems than generation without review, but judges remain language models and may miss errors or introduce bias. Their precision and recall must be measured against clinician-labelled test cases.</p>
+        <p class="qa-status"><strong>Current status:</strong> Implemented as a safety layer; effectiveness has not yet been clinically benchmarked.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>3. How can AI reconcile clinical, nutrition, and lifestyle recommendations while maintaining transparency and trust?</h3>
+        <p><span class="qa-answer-label">Answer:</span>Each perspective should be generated independently from the same retrieved evidence, then compared for unsupported claims and material disagreement before synthesis. MediRAG-West follows that pattern and asks the final response to preserve genuine disagreements rather than hide them. Citations, evidence-strength labels, agent-specific gaps, and safety notes let users see why advice was included and where the system remains uncertain.</p>
+        <p class="qa-status"><strong>Current status:</strong> Demonstrated as a transparent integration method in the working prototype; its effect on trust still requires user testing.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>4. Does multi-agent debate and consensus-building improve answer quality compared with single-agent generation?</h3>
+        <p><span class="qa-answer-label">Answer:</span>Existing research suggests that debate can improve factuality and reasoning in some tasks<a href="#ref-2" class="cite">[2]</a>, and this prototype shows how to apply that process to healthcare information. However, no direct ablation study has yet compared MediRAG-West with and without its debate stage. A valid answer requires both versions to be scored blindly on factual accuracy, completeness, safety, and unsupported-claim rate.</p>
+        <p class="qa-status"><strong>Current status:</strong> Promising according to prior research; not yet demonstrated by a project-specific comparison.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>5. How should healthcare AI communicate evidence strength, uncertainty, and conflicting viewpoints?</h3>
+        <p><span class="qa-answer-label">Answer:</span>It should use plain language, cite the supporting sources, label evidence strength, state important evidence gaps, and disclose material disagreement. Confidence should be presented as a system-level guide rather than a probability that the medical answer is correct. When evidence is missing or safety risk is high, the system should decline to answer or direct the user to appropriate professional or emergency care instead of producing a confident guess.</p>
+        <p class="qa-status"><strong>Current status:</strong> Implemented in the response design, with the confidence score explicitly limited as experimental.</p>
+      </div>
+
+      <div class="qa-item">
+        <h3>6. Can multi-perspective Western medicine AI increase confidence and perceived trustworthiness without sacrificing scientific rigor?</h3>
+        <p><span class="qa-answer-label">Answer:</span>This has not yet been established. Multiple perspectives may improve perceived completeness, while visible evidence, disagreement, and uncertainty may support justified trust rather than blind confidence. They could also confuse users or create false reassurance if presented poorly. The claim therefore requires a user study comparing single- and multi-perspective answers, alongside expert assessment of factual accuracy, citation support, calibration, and safety.</p>
+        <p class="qa-status"><strong>Current status:</strong> An open research question requiring user and expert evaluation.</p>
+      </div>
+    </section>
+
+    <!-- ══════ 7 ══════ -->
+    <section id="s7">
+      <h2><span class="sec-num">7</span>Limitations</h2>
       <div class="callout is-limit">
         <span class="callout-label">Stated plainly</span>
         <p>
@@ -695,9 +767,9 @@ td strong { color: var(--ink); font-weight: 600; }
       </ul>
     </section>
 
-    <!-- ══════ 7 ══════ -->
-    <section id="s7">
-      <h2><span class="sec-num">7</span>Conclusion</h2>
+    <!-- ══════ 8 ══════ -->
+    <section id="s8">
+      <h2><span class="sec-num">8</span>Conclusion</h2>
       <p>
         We built a small, working, free system where three AI agents answer a health question
         independently, a fourth AI call compares their answers, four more AI calls judge them on
